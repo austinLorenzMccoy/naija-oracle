@@ -16,11 +16,17 @@ from app.config import settings
 Base = declarative_base()
 
 # Create engine
+database_url = settings.DATABASE_URL or "sqlite+aiosqlite:///./naija_oracle.db"
+
+# Ensure asyncpg driver for PostgreSQL
+if database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(
-    settings.DATABASE_URL or "sqlite+aiosqlite:///./naija_oracle.db",
+    database_url,
     echo=True,
     poolclass=StaticPool,
-    connect_args={"check_same_thread": False} if "sqlite" in settings.DATABASE_URL else {}
+    connect_args={"check_same_thread": False} if "sqlite" in database_url else {}
 )
 
 # Session factory
