@@ -98,7 +98,12 @@ Existing LLM-based review and recommendation systems suffer from three compoundi
 # 1. Create Render account
 # 2. Connect GitHub repository
 # 3. Configure environment variables
-# 4. Deploy with Docker
+# 4. Deploy with pip
+
+# Build Settings:
+- Build Command: cd backend && pip install -r requirements.txt
+- Start Command: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+- Health Check Path: /health
 
 # Environment Variables Needed:
 GROQ_API_KEY=your_groq_api_key
