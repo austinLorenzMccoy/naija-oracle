@@ -21,6 +21,12 @@ database_url = settings.DATABASE_URL or "sqlite+aiosqlite:///./naija_oracle.db"
 # Ensure asyncpg driver for PostgreSQL
 if database_url.startswith("postgresql://"):
     database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    
+    # Fix DuplicatePreparedStatementError with Supabase pooler
+    if "pooler.supabase.com" in database_url and ":6543/" in database_url:
+        # Switch to direct connection port 5432 and disable prepared statement cache
+        database_url = database_url.replace(":6543/", ":5432/")
+        database_url += "?prepared_statement_cache_size=0"
 
 engine = create_async_engine(
     database_url,
