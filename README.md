@@ -73,6 +73,68 @@ Existing LLM-based review and recommendation systems suffer from three compoundi
 └─────────────────────────────────────────────────────┘
 ```
 
+## 🚀 Deployment
+
+### **Production Architecture**
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │    Backend      │    │   Database      │
+│   (Vercel)       │◄──►│   (Render)       │◄──►│   (Supabase)     │
+│                 │    │                 │    │                 │
+│ React + Vite    │    │ FastAPI + ML    │    │ PostgreSQL      │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                         ┌─────────────────┐
+                         │   ML Tracking    │
+                         │   (DagsHub)      │
+                         └─────────────────┘
+```
+
+### **Backend Deployment (Render)**
+```bash
+# 1. Create Render account
+# 2. Connect GitHub repository
+# 3. Configure environment variables
+# 4. Deploy with Docker
+
+# Environment Variables Needed:
+GROQ_API_KEY=your_groq_api_key
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_KEY=your_supabase_service_key
+DATABASE_URL=postgresql+asyncpg://postgres.your_project@aws-0-us-east-1.pooler.supabase.com:6543/postgres
+DAGSHUB_TOKEN=your_dagshub_token
+DAGSHUB_USERNAME=your_dagshub_username
+JWT_SECRET_KEY=your_jwt_secret
+```
+
+### **Frontend Deployment (Vercel)**
+```bash
+# 1. Create Vercel account
+# 2. Connect GitHub repository
+# 3. Configure build settings
+# 4. Deploy automatically
+
+# Build Configuration:
+- Build Command: npm run build
+- Output Directory: dist
+- Install Command: npm install
+```
+
+### **Database Setup (Supabase)**
+```bash
+# 1. Create Supabase project
+# 2. Run schema setup script
+# 3. Configure Row Level Security
+# 4. Set up environment variables
+
+# Schema File: supabase_schema.sql
+# Tables: personas, reviews, recommendations, cultural_voice_index, conversation_history, ml_experiments, analytics
+```
+
 ## 🤖 Dual-Agent System
 
 ### **Task A - Persona Simulator Agent**

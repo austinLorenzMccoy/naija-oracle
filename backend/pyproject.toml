@@ -5,7 +5,7 @@ description = "Backend API for Naija Oracle - LLM agents that simulate Nigerian 
 authors = [
     {name = "Chibueze Augustine Chidera", email = "chidera@example.com"}
 ]
-readme = "README.md"
+# readme = "README.md"  # Commented out to fix Docker build
 license = {text = "Apache-2.0"}
 requires-python = ">=3.11"
 keywords = ["llm", "recommendation", "nigerian", "cultural-ai", "fastapi"]
@@ -21,25 +21,20 @@ classifiers = [
 
 dependencies = [
     "fastapi>=0.115.6",
-    "uvicorn[standard]>=0.32.1",
+    "uvicorn[standard]>=0.32.0",
     "pydantic>=2.10.4",
+    "pydantic-settings>=2.6.1",
     "python-dotenv>=1.0.1",
+    "python-multipart>=0.0.9",
+    "httpx>=0.27.2",
+    "asyncpg>=0.31.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "alembic>=1.14.0",
     "groq>=0.13.0",
     "supabase>=2.10.0",
-    "openai>=1.59.6",
-    "python-multipart>=0.0.17",
-    "httpx>=0.28.1",
     "numpy>=1.26.4",
     "pandas>=2.2.3",
     "scikit-learn>=1.5.2",
-    "sentence-transformers>=3.3.1",
-    "transformers>=4.47.1",
-    "torch>=2.5.1",
-    "mlflow>=2.19.0",
-    "bert-score>=0.4.2",
-    "rouge-score>=0.1.2",
-    "psycopg2-binary>=2.9.10",
-    "asyncpg>=0.30.0",
     "python-jose[cryptography]>=3.3.0",
     "passlib[bcrypt]>=1.7.4",
 ]
@@ -50,19 +45,30 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "black>=24.0.0",
     "isort>=5.13.0",
-    "flake8>=7.0.0",
-    "mypy>=1.8.0",
-    "pre-commit>=3.6.0",
+    "mypy>=1.13.0",
+    "pytest-cov>=6.0.0",
+    "pre-commit>=4.0.1",
+]
+ml = [
+    "sentence-transformers>=3.3.1",
+    "bert-score==0.3.13",
+    "rouge-score>=0.1.2",
+    "mlflow>=2.19.0",
+    "torch>=2.2.0,<2.5.0",
+    "transformers>=4.47.1",
 ]
 
 [project.urls]
-Homepage = "https://github.com/example/naija-oracle"
-Repository = "https://github.com/example/naija-oracle"
+Homepage = "https://github.com/austinLorenzMccoy/naija-oracle"
+Repository = "https://github.com/austinLorenzMccoy/naija-oracle"
 Documentation = "https://naija-oracle.docs.com"
-"Bug Tracker" = "https://github.com/example/naija-oracle/issues"
+"Bug Tracker" = "https://github.com/austinLorenzMccoy/naija-oracle/issues"
 
 [project.scripts]
 naija-oracle = "app.main:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
 
 [build-system]
 requires = ["hatchling"]

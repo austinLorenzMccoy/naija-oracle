@@ -91,7 +91,7 @@ async def stream_recommendations(
                 for char in rec["text"]:
                     yield f"data: {RecommendationStream(request_id=request_id, token=char, is_complete=False).json()}\n\n"
                     await asyncio.sleep(0.02)
-                yield f"data: {RecommendationStream(request_id=request_id, token='\n\n', is_complete=False).json()}\n\n"
+                yield f"data: {RecommendationStream(request_id=request_id, token=chr(10) + chr(10), is_complete=False).json()}\n\n"
                 await asyncio.sleep(0.1)
             
             yield f"data: {RecommendationStream(request_id=request_id, token='', is_complete=True).json()}\n\n"

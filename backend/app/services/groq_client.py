@@ -87,7 +87,7 @@ You are Naija Oracle — a cultural intelligence system that generates authentic
 
 VOICE PROFILE:
 - City: {persona.get('city', 'Lagos')} | LGA: {persona.get('lga', 'Unknown')}
-- Language: {persona.get('primary_language', 'English')} | Pidgin intensity: {persona.get('pidgin_intensity', 0.5):.1f}/1.0
+- Language: {persona.get('primary_language', 'English')} | Pidgin intensity: {format(persona.get('pidgin_intensity', 0.5), '.1f')}/1.0
 - Style: {persona.get('review_style', 'casual')} | Avg rating: {persona.get('avg_rating', 3.5)}
 - Sentiment volatility: {persona.get('sentiment_volatility', 'medium')}
 
@@ -142,9 +142,14 @@ Generate a review that sounds exactly like this persona would write it.
         history_context = ""
         if history:
             history_context = "\n".join([
-                f"User: {turn.get('user_query', '')}\nAgent: {turn.get('agent_response', '')}"
+                f"User: {turn.get('user_query', '')}" + "\n" + f"Agent: {turn.get('agent_response', '')}"
                 for turn in history[-3:]  # Last 3 turns
             ])
+        
+        # Build history section outside f-string to avoid backslash issues
+        history_section = ""
+        if history_context:
+            history_section = f"CONVERSATION HISTORY:\n{history_context}\n"
         
         system_prompt = f"""
 You are Naija Oracle — a recommendation engine tuned to Nigerian consumer preferences and cultural context.
@@ -154,7 +159,7 @@ USER PROFILE:
 - Primary language: {persona.get('primary_language', 'English')}
 - Avg rating tendency: {persona.get('avg_rating', 3.5)}
 - Cultural markers: {', '.join(persona.get('cultural_markers', []))}
-- Pidgin intensity: {persona.get('pidgin_intensity', 0.5):.1f}/1.0
+- Pidgin intensity: {format(persona.get('pidgin_intensity', 0.5), '.1f')}/1.0
 
 CURRENT CONTEXT:
 - Location: {context.get('location', 'Unknown')}
@@ -171,8 +176,7 @@ RECOMMENDATION RULES:
 6. Use natural, culturally appropriate language
 7. Consider transportation and logistics in Nigerian context
 
-{f'CONVERSATION HISTORY:\n{history_context}\n' if history_context else ''}
-
+{history_section}
 Generate personalized recommendations with clear reasoning.
 """
         

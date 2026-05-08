@@ -22,6 +22,10 @@ class Settings(BaseSettings):
     SUPABASE_ANON_KEY: str = os.getenv("SUPABASE_ANON_KEY", "")
     SUPABASE_SERVICE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
     
+    # DagsHub Configuration
+    DAGSHUB_TOKEN: Optional[str] = os.getenv("DAGSHUB_TOKEN", "")
+    DAGSHUB_USERNAME: Optional[str] = os.getenv("DAGSHUB_USERNAME", "")
+    
     # JWT Configuration
     JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "your-secret-key")
     JWT_ALGORITHM: str = "HS256"
@@ -47,9 +51,7 @@ class Settings(BaseSettings):
     # Rate Limiting
     RATE_LIMIT_PER_MINUTE: int = 30
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = {"env_file": ".env", "case_sensitive": True, "extra": "ignore"}
 
 # Global settings instance
 settings = Settings()
