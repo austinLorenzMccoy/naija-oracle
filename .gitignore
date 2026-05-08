@@ -303,6 +303,9 @@ docs/_build/
 docs/.doctrees/
 docs/site/
 
+# Keep docs local only (remove from GitHub)
+docs/
+
 # Performance profiling
 *.prof
 *.profile

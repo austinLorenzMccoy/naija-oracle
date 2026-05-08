@@ -14,10 +14,10 @@
 [![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://docker.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
-[![Build Status](https://img.shields.io/github/workflow/status/username/naija-oracle/CI?branch=main)](https://github.com/username/naija-oracle/actions)
-[![Coverage](https://img.shields.io/codecov/c/github/username/naija-oracle)](https://codecov.io/gh/username/naija-oracle)
-[![Code Quality](https://img.shields.io/codacy/grade/username/naija-oracle)](https://www.codacy.com/gh/username/naija-oracle)
-[![Security](https://img.shields.io/snyk/vulnerabilities/github/username/naija-oracle)](https://snyk.io/test/github/username/naija-oracle)
+[![Build Status](https://img.shields.io/github/workflow/status/austinLorenzMccoy/naija-oracle/CI?branch=main)](https://github.com/austinLorenzMccoy/naija-oracle/actions)
+[![Coverage](https://img.shields.io/codecov/c/github/austinLorenzMccoy/naija-oracle)](https://codecov.io/gh/austinLorenzMccoy/naija-oracle)
+[![Code Quality](https://img.shields.io/codacy/grade/austinLorenzMccoy/naija-oracle)](https://www.codacy.com/gh/austinLorenzMccoy/naija-oracle)
+[![Security](https://img.shields.io/snyk/vulnerabilities/github/austinLorenzMccoy/naija-oracle)](https://snyk.io/test/github/austinLorenzMccoy/naija-oracle)
 
 [![MLflow](https://img.shields.io/badge/MLflow-2.19+-blue.svg)](https://mlflow.org)
 [![PyTorch](https://img.shields.io/badge/PyTorch-2.5+-red.svg)](https://pytorch.org)
@@ -25,10 +25,10 @@
 [![Groq](https://img.shields.io/badge/Groq-API-orange.svg)](https://groq.com)
 [![Supabase](https://img.shields.io/badge/Supabase-Database-green.svg)](https://supabase.com)
 
-[![Stars](https://img.shields.io/github/stars/username/naija-oracle?style=social)](https://github.com/username/naija-oracle)
-[![Forks](https://img.shields.io/github/forks/username/naija-oracle?style=social)](https://github.com/username/naija-oracle)
-[![Issues](https://img.shields.io/github/issues/username/naija-oracle)](https://github.com/username/naija-oracle/issues)
-[![PRs](https://img.shields.io/github/issues-pr/username/naija-oracle)](https://github.com/username/naija-oracle/pulls)
+[![Stars](https://img.shields.io/github/stars/austinLorenzMccoy/naija-oracle?style=social)](https://github.com/austinLorenzMccoy/naija-oracle)
+[![Forks](https://img.shields.io/github/forks/austinLorenzMccoy/naija-oracle?style=social)](https://github.com/austinLorenzMccoy/naija-oracle)
+[![Issues](https://img.shields.io/github/issues/austinLorenzMccoy/naija-oracle)](https://github.com/austinLorenzMccoy/naija-oracle/issues)
+[![PRs](https://img.shields.io/github/issues-pr/austinLorenzMccoy/naija-oracle)](https://github.com/austinLorenzMccoy/naija-oracle/pulls)
 
 ---
 
