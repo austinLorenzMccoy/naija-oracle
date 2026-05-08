@@ -1,0 +1,12 @@
+[core]
+    analytics = false
+    remote = origin
+    autostage = true
+
+['remote "origin"']
+    url = dagsHub://username/naija-oracle
+    username = username
+    password = DVC_TOKEN
+
+['remote "storage"']
+    url = s3://naija-oracle-models

@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Oracle Dashboard | Consumer Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500&amp;family=Fraunces:ital,wght@0,300;0,700;1,300;1,700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#ffb785",
+                    "surface-container-low": "#1d1b19",
+                    "on-secondary-container": "#ffaf9c",
+                    "surface-container-high": "#2b2a27",
+                    "terra-500": "#C94020",
+                    "tertiary": "#bbc3ff",
+                    "oracle-smoke": "#2A2825",
+                    "on-tertiary": "#001d94",
+                    "inverse-primary": "#954a00",
+                    "surface-container-highest": "#363432",
+                    "oracle-charcoal": "#1A1916",
+                    "amber-500": "#F5831F",
+                    "tertiary-fixed-dim": "#bbc3ff",
+                    "on-primary": "#502500",
+                    "text-secondary": "#9A9590",
+                    "terra-300": "#F28060",
+                    "on-tertiary-fixed-variant": "#2539ab",
+                    "tertiary-fixed": "#dee0ff",
+                    "on-primary-fixed-variant": "#713700",
+                    "inverse-on-surface": "#32302e",
+                    "tertiary-container": "#8a9aff",
+                    "background": "#141311",
+                    "surface-bright": "#3b3936",
+                    "inverse-surface": "#e7e2dd",
+                    "surface-container": "#211f1d",
+                    "surface-variant": "#363432",
+                    "surface-container-lowest": "#0f0e0c",
+                    "on-surface-variant": "#ddc1b0",
+                    "surface-tint": "#ffb785",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "green-500": "#2DB37A",
+                    "on-surface": "#e7e2dd",
+                    "secondary-fixed": "#ffdad2",
+                    "on-secondary-fixed": "#3d0600",
+                    "on-secondary-fixed-variant": "#8b1b00",
+                    "on-tertiary-container": "#0e279d",
+                    "on-primary-container": "#5b2b00",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#141311",
+                    "secondary-fixed-dim": "#ffb4a3",
+                    "on-background": "#e7e2dd",
+                    "primary": "#ffb785",
+                    "oracle-ash": "#3D3B37",
+                    "outline": "#a58c7c",
+                    "primary-fixed": "#ffdcc6",
+                    "text-primary": "#F0EDE8",
+                    "text-tertiary": "#5C5955",
+                    "surface": "#141311",
+                    "outline-variant": "#564336",
+                    "amber-300": "#FFBA70",
+                    "on-primary-fixed": "#301400",
+                    "on-tertiary-fixed": "#000e5d",
+                    "secondary": "#ffb4a3",
+                    "adire-stroke": "rgba(245, 131, 31, 0.12)",
+                    "error-container": "#93000a",
+                    "primary-container": "#f5831f",
+                    "amber-700": "#C46200",
+                    "amber-900": "#7A3B00",
+                    "on-secondary": "#621000",
+                    "secondary-container": "#9b1f00",
+                    "terra-700": "#8B2500",
+                    "oracle-void": "#0C0B09",
+                    "indigo-500": "#3B4EBF",
+                    "amber-100": "#FFF0DC"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit-base": "4px",
+                    "panel-input": "420px",
+                    "margin-page": "2rem",
+                    "sidebar-width": "240px",
+                    "gutter": "1.5rem"
+            },
+            "fontFamily": {
+                    "heading": ["DM Sans"],
+                    "hero": ["Fraunces"],
+                    "hero-italic": ["Fraunces"],
+                    "body": ["DM Sans"],
+                    "display": ["Fraunces"],
+                    "mono-data": ["JetBrains Mono"],
+                    "micro": ["DM Sans"],
+                    "subheading": ["DM Sans"]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .adire-pattern {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l15 30-15 30L15 30z' fill='%23F5831F' fill-opacity='0.04'/%3E%3C/svg%3E");
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-oracle-void text-text-primary font-body antialiased selection:bg-amber-500/30">
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-oracle-charcoal border-r border-oracle-ash flex flex-col h-full py-6 z-40">
+<div class="px-6 mb-10">
+<h1 class="font-hero-italic text-subheading italic text-amber-500 leading-none">Naija Oracle</h1>
+<p class="font-micro text-micro text-text-tertiary mt-1">Consumer Insights</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 bg-oracle-smoke text-amber-500 border-l-3 border-amber-500 px-4 py-3 Active: translate-x-1 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body text-body">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-body text-body">Review Simulator</span>
+</a>
+<a class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-body text-body">Recommendations</span>
+</a>
+<a class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-body text-body">Persona Profiles</span>
+</a>
+<a class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body text-body">Settings</span>
+</a>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full py-3 bg-amber-500 text-oracle-void font-bold rounded flex items-center justify-center gap-2 hover:bg-amber-300 transition-colors">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+<span>New Simulation</span>
+</button>
+<div class="mt-6 border-t border-oracle-ash pt-4">
+<a class="flex items-center gap-3 text-text-secondary px-4 py-2 hover:text-text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-micro text-micro">Help Center</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width min-h-screen adire-pattern">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-page h-16 z-50 bg-oracle-void border-b border-oracle-ash sticky top-0">
+<div class="flex items-center gap-4">
+<h2 class="font-display text-heading text-text-primary font-bold">Dashboard</h2>
+<div class="hidden md:flex items-center gap-6 ml-8">
+<span class="text-amber-500 font-bold border-b-2 border-amber-500 pb-1 cursor-default">Overview</span>
+<span class="text-text-secondary font-body hover:text-amber-300 transition-colors cursor-pointer">Analytics</span>
+<span class="text-text-secondary font-body hover:text-amber-300 transition-colors cursor-pointer">Reports</span>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="relative hidden lg:block">
+<input class="bg-oracle-charcoal border border-oracle-ash text-text-secondary text-micro px-4 py-2 pl-10 rounded focus:ring-1 focus:ring-amber-500 outline-none w-64" placeholder="Search insights..." type="text"/>
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" data-icon="search">search</span>
+</div>
+<span class="material-symbols-outlined text-text-secondary hover:text-amber-300 transition-colors cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-text-secondary hover:text-amber-300 transition-colors cursor-pointer" data-icon="settings">settings</span>
+<div class="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center overflow-hidden">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A professional studio headshot of a stylish Nigerian man with a modern haircut, wearing a minimalist dark linen shirt. The background is a soft-focus warm amber glow, matching a luxury tech professional aesthetic. High-end lighting creates sharp definition and a premium corporate portrait feel." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp7tltURWeWO46eS0xZk5v4-8O79dmmQNiMLNkj-AaBZdFKGtbScTogXDRtNT3Zq3s7jEUaMv3GdHKzQgKTXXwl2W5FVl92Y2OLnb4iofKI72Af--Fm5xK7SBpNpp8AQZMrakANj6I2MnsF_p5CdRGG5ZGnHAfcY370ZtIhfTJ-RmTlYfLc_VvjRJx8u9LVy_xkMCJBHO-4oB2Q0KS0_kIfcbY2DFPJcb49g1F5SsqLXLpRbudHg_-2Aj3TxBRW0d8kA-sS3X8g5Y"/>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<div class="p-margin-page">
+<!-- Metric Grid -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-8">
+<!-- Card 1 -->
+<div class="bg-oracle-charcoal border border-oracle-ash p-6 border-t-3 border-t-amber-500">
+<div class="flex justify-between items-start mb-4">
+<p class="text-text-secondary text-micro font-medium uppercase tracking-wider">Reviews Generated</p>
+<span class="material-symbols-outlined text-amber-500" data-icon="rate_review">rate_review</span>
+</div>
+<h3 class="font-mono-data text-display text-text-primary">12,482</h3>
+<p class="text-green-500 text-micro mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="trending_up">trending_up</span>
+                        +14.2% from last week
+                    </p>
+</div>
+<!-- Card 2 -->
+<div class="bg-oracle-charcoal border border-oracle-ash p-6 border-t-3 border-t-amber-500">
+<div class="flex justify-between items-start mb-4">
+<p class="text-text-secondary text-micro font-medium uppercase tracking-wider">Avg BERTScore</p>
+<span class="material-symbols-outlined text-amber-500" data-icon="verified">verified</span>
+</div>
+<h3 class="font-mono-data text-display text-text-primary">0.892</h3>
+<div class="mt-3 px-2 py-1 bg-amber-500/10 text-amber-500 inline-block rounded font-mono-data text-[10px]">AMBER PILL</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-oracle-charcoal border border-oracle-ash p-6 border-t-3 border-t-amber-500">
+<div class="flex justify-between items-start mb-4">
+<p class="text-text-secondary text-micro font-medium uppercase tracking-wider">Avg NDCG@10</p>
+<span class="material-symbols-outlined text-amber-500" data-icon="rebase_edit">rebase_edit</span>
+</div>
+<h3 class="font-mono-data text-display text-text-primary">0.745</h3>
+<div class="mt-3 px-2 py-1 bg-green-500/10 text-green-500 inline-block rounded font-mono-data text-[10px]">GREEN PILL</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-oracle-charcoal border border-oracle-ash p-6 border-t-3 border-t-amber-500">
+<div class="flex justify-between items-start mb-4">
+<p class="text-text-secondary text-micro font-medium uppercase tracking-wider">CVI Hit Rate</p>
+<span class="material-symbols-outlined text-amber-500" data-icon="hub">hub</span>
+</div>
+<h3 class="font-mono-data text-display text-text-primary">91.4%</h3>
+<div class="mt-3 px-2 py-1 bg-terra-500/10 text-terra-500 inline-block rounded font-mono-data text-[10px]">TERRACOTTA PILL</div>
+</div>
+</section>
+<!-- Middle Section: Experiment Chart and Feed -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<!-- Experiment Comparison Chart (2/3 width) -->
+<section class="lg:col-span-2 bg-oracle-charcoal border border-oracle-ash p-6 relative overflow-hidden">
+<div class="flex justify-between items-center mb-8">
+<div>
+<h4 class="font-heading text-subheading text-text-primary">Experiment Comparison</h4>
+<p class="text-text-tertiary text-micro">BERTScore variance across model iterations</p>
+</div>
+<select class="bg-oracle-void border border-oracle-ash text-text-secondary text-micro rounded px-3 py-1 outline-none">
+<option>Last 5 Versions</option>
+<option>Last 10 Versions</option>
+</select>
+</div>
+<!-- Simplified Custom Chart with Tailwind -->
+<div class="h-64 flex items-end justify-between gap-4 px-4 pb-8 border-b border-oracle-ash relative">
+<!-- Chart Lines (Y-axis markers) -->
+<div class="absolute inset-x-0 bottom-0 top-0 flex flex-col justify-between pointer-events-none opacity-20">
+<div class="border-t border-oracle-ash w-full"></div>
+<div class="border-t border-oracle-ash w-full"></div>
+<div class="border-t border-oracle-ash w-full"></div>
+<div class="border-t border-oracle-ash w-full"></div>
+</div>
+<!-- Bar 1 -->
+<div class="flex-1 flex flex-col items-center group relative">
+<div class="bg-oracle-smoke w-full h-[60%] border-t border-x border-oracle-ash transition-all group-hover:bg-amber-900/40"></div>
+<div class="bg-amber-500 w-full h-[15%] relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono-data text-amber-300 opacity-0 group-hover:opacity-100">0.82</span>
+</div>
+<span class="text-micro text-text-tertiary mt-2">v1.0.2</span>
+</div>
+<!-- Bar 2 -->
+<div class="flex-1 flex flex-col items-center group relative">
+<div class="bg-oracle-smoke w-full h-[55%] border-t border-x border-oracle-ash transition-all group-hover:bg-amber-900/40"></div>
+<div class="bg-amber-500 w-full h-[20%] relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono-data text-amber-300 opacity-0 group-hover:opacity-100">0.85</span>
+</div>
+<span class="text-micro text-text-tertiary mt-2">v1.0.3</span>
+</div>
+<!-- Bar 3 -->
+<div class="flex-1 flex flex-col items-center group relative">
+<div class="bg-oracle-smoke w-full h-[45%] border-t border-x border-oracle-ash transition-all group-hover:bg-amber-900/40"></div>
+<div class="bg-amber-500 w-full h-[30%] relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono-data text-amber-300 opacity-0 group-hover:opacity-100">0.91</span>
+</div>
+<span class="text-micro text-text-tertiary mt-2">v1.0.4-beta</span>
+</div>
+<!-- Bar 4 -->
+<div class="flex-1 flex flex-col items-center group relative">
+<div class="bg-oracle-smoke w-full h-[50%] border-t border-x border-oracle-ash transition-all group-hover:bg-amber-900/40"></div>
+<div class="bg-amber-500 w-full h-[25%] relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono-data text-amber-300 opacity-0 group-hover:opacity-100">0.88</span>
+</div>
+<span class="text-micro text-text-tertiary mt-2">v1.1.0</span>
+</div>
+<!-- Bar 5 -->
+<div class="flex-1 flex flex-col items-center group relative">
+<div class="bg-oracle-smoke w-full h-[40%] border-t border-x border-oracle-ash transition-all group-hover:bg-amber-900/40"></div>
+<div class="bg-amber-500 w-full h-[35%] relative">
+<span class="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-mono-data text-amber-300 opacity-0 group-hover:opacity-100">0.94</span>
+</div>
+<span class="text-micro text-text-tertiary mt-2">v1.1.1-rc</span>
+</div>
+</div>
+</section>
+<!-- Activity Feed (1/3 width) -->
+<section class="bg-oracle-charcoal border border-oracle-ash flex flex-col">
+<div class="p-6 border-b border-oracle-ash flex justify-between items-center">
+<h4 class="font-heading text-subheading text-text-primary">Live Activity</h4>
+<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+</div>
+<div class="flex-1 overflow-y-auto max-h-[400px]">
+<!-- Row 1 -->
+<div class="p-4 border-b border-oracle-ash hover:bg-oracle-smoke transition-colors">
+<div class="flex justify-between items-start mb-1">
+<span class="text-micro font-bold text-amber-500">Ifeanyi from Aba</span>
+<span class="text-[10px] font-mono-data text-text-tertiary">14:22:05</span>
+</div>
+<p class="text-micro text-text-secondary italic mb-2 line-clamp-1">"The delivery was sharp sharp, no stories at all..."</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<!-- Row 2 -->
+<div class="p-4 border-b border-oracle-ash hover:bg-oracle-smoke transition-colors">
+<div class="flex justify-between items-start mb-1">
+<span class="text-micro font-bold text-amber-500">Abuja Tech Bro</span>
+<span class="text-[10px] font-mono-data text-text-tertiary">14:20:12</span>
+</div>
+<p class="text-micro text-text-secondary italic mb-2 line-clamp-1">"Implementation is sleek, but the pricing is bit high o..."</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-text-tertiary">star</span>
+</div>
+</div>
+<!-- Row 3 -->
+<div class="p-4 border-b border-oracle-ash hover:bg-oracle-smoke transition-colors">
+<div class="flex justify-between items-start mb-1">
+<span class="text-micro font-bold text-amber-500">Mama Nkechi</span>
+<span class="text-[10px] font-mono-data text-text-tertiary">14:18:45</span>
+</div>
+<p class="text-micro text-text-secondary italic mb-2 line-clamp-1">"God bless you people, my business is moving well..."</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<!-- Row 4 -->
+<div class="p-4 border-b border-oracle-ash hover:bg-oracle-smoke transition-colors">
+<div class="flex justify-between items-start mb-1">
+<span class="text-micro font-bold text-amber-500">Lagos Island Hustler</span>
+<span class="text-[10px] font-mono-data text-text-tertiary">14:15:30</span>
+</div>
+<p class="text-micro text-text-secondary italic mb-2 line-clamp-1">"Why is the network behaving like this today?"</p>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[12px] text-text-tertiary">star</span>
+<span class="material-symbols-outlined text-[12px] text-text-tertiary">star</span>
+<span class="material-symbols-outlined text-[12px] text-text-tertiary">star</span>
+</div>
+</div>
+</div>
+<button class="p-4 text-micro text-amber-500 font-medium hover:text-amber-300 transition-colors text-center border-t border-oracle-ash">
+                        View Full Stream
+                    </button>
+</section>
+</div>
+<!-- Bottom Section: Info Tiles -->
+<section class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-gutter">
+<div class="bg-oracle-charcoal border-l-3 border-terra-500 border-oracle-ash p-6 flex items-center gap-6">
+<div class="w-16 h-16 shrink-0 bg-oracle-smoke rounded flex items-center justify-center border border-oracle-ash">
+<span class="material-symbols-outlined text-terra-500 text-3xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div>
+<h5 class="font-heading text-body text-text-primary">Optimization Tip</h5>
+<p class="text-micro text-text-secondary">Your BERTScore has improved by 4% after the latest training set update with more Pidgin dialects.</p>
+</div>
+</div>
+<div class="bg-oracle-charcoal border-l-3 border-amber-500 border-oracle-ash p-6 flex items-center gap-6">
+<div class="w-16 h-16 shrink-0 bg-oracle-smoke rounded flex items-center justify-center border border-oracle-ash">
+<span class="material-symbols-outlined text-amber-500 text-3xl" data-icon="lightbulb">lightbulb</span>
+</div>
+<div>
+<h5 class="font-heading text-body text-text-primary">Market Insight</h5>
+<p class="text-micro text-text-secondary">Sentiment peaks on Friday evenings, matching "Owambe" patterns across Southwest regions.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer -->
+<footer class="flex flex-col md:flex-row justify-between items-center px-margin-page py-8 w-full border-t border-oracle-ash bg-oracle-void">
+<div class="mb-4 md:mb-0">
+<span class="font-hero-italic text-micro italic text-amber-500">Naija Oracle</span>
+<span class="font-micro text-micro text-text-tertiary ml-2">© 2024 Naija Oracle. Built for Balogun, Optimized for Global.</span>
+</div>
+<div class="flex gap-6">
+<a class="text-text-tertiary font-micro text-micro hover:text-amber-300 transition-colors" href="#">Privacy Policy</a>
+<a class="text-text-tertiary font-micro text-micro hover:text-amber-300 transition-colors" href="#">Terms of Service</a>
+<a class="text-text-tertiary font-micro text-micro hover:text-amber-300 transition-colors" href="#">API Docs</a>
+</div>
+</footer>
+</main>
+</body></html>

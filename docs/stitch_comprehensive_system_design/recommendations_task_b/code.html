@@ -1,0 +1,399 @@
+<html class="dark"><head><meta charset="utf-8"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Fraunces:ital,wght@0,300;0,700;1,300&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#ffb785",
+                    "surface-container-low": "#1d1b19",
+                    "on-secondary-container": "#ffaf9c",
+                    "surface-container-high": "#2b2a27",
+                    "terra-500": "#C94020",
+                    "tertiary": "#bbc3ff",
+                    "oracle-smoke": "#2A2825",
+                    "on-tertiary": "#001d94",
+                    "inverse-primary": "#954a00",
+                    "surface-container-highest": "#363432",
+                    "oracle-charcoal": "#1A1916",
+                    "amber-500": "#F5831F",
+                    "tertiary-fixed-dim": "#bbc3ff",
+                    "on-primary": "#502500",
+                    "text-secondary": "#9A9590",
+                    "terra-300": "#F28060",
+                    "on-tertiary-fixed-variant": "#2539ab",
+                    "tertiary-fixed": "#dee0ff",
+                    "on-primary-fixed-variant": "#713700",
+                    "inverse-on-surface": "#32302e",
+                    "tertiary-container": "#8a9aff",
+                    "background": "#141311",
+                    "surface-bright": "#3b3936",
+                    "inverse-surface": "#e7e2dd",
+                    "surface-container": "#211f1d",
+                    "surface-variant": "#363432",
+                    "surface-container-lowest": "#0f0e0c",
+                    "on-surface-variant": "#ddc1b0",
+                    "surface-tint": "#ffb785",
+                    "on-error": "#690005",
+                    "on-error-container": "#ffdad6",
+                    "green-500": "#2DB37A",
+                    "on-surface": "#e7e2dd",
+                    "secondary-fixed": "#ffdad2",
+                    "on-secondary-fixed": "#3d0600",
+                    "on-secondary-fixed-variant": "#8b1b00",
+                    "on-tertiary-container": "#0e279d",
+                    "on-primary-container": "#5b2b00",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#141311",
+                    "secondary-fixed-dim": "#ffb4a3",
+                    "on-background": "#e7e2dd",
+                    "primary": "#ffb785",
+                    "oracle-ash": "#3D3B37",
+                    "outline": "#a58c7c",
+                    "primary-fixed": "#ffdcc6",
+                    "text-primary": "#F0EDE8",
+                    "text-tertiary": "#5C5955",
+                    "surface": "#141311",
+                    "outline-variant": "#564336",
+                    "amber-300": "#FFBA70",
+                    "on-primary-fixed": "#301400",
+                    "on-tertiary-fixed": "#000e5d",
+                    "secondary": "#ffb4a3",
+                    "adire-stroke": "rgba(245, 131, 31, 0.12)",
+                    "error-container": "#93000a",
+                    "primary-container": "#f5831f",
+                    "amber-700": "#C46200",
+                    "amber-900": "#7A3B00",
+                    "on-secondary": "#621000",
+                    "secondary-container": "#9b1f00",
+                    "terra-700": "#8B2500",
+                    "oracle-void": "#0C0B09",
+                    "indigo-500": "#3B4EBF",
+                    "amber-100": "#FFF0DC"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit-base": "4px",
+                    "panel-input": "420px",
+                    "margin-page": "2rem",
+                    "sidebar-width": "240px",
+                    "gutter": "1.5rem"
+            },
+            "fontFamily": {
+                    "heading": ["DM Sans"],
+                    "hero": ["Fraunces"],
+                    "hero-italic": ["Fraunces"],
+                    "body": ["DM Sans"],
+                    "display": ["Fraunces"],
+                    "mono-data": ["JetBrains Mono"],
+                    "micro": ["DM Sans"],
+                    "subheading": ["DM Sans"]
+            },
+            "fontSize": {
+                    "heading": ["1.5rem", {"lineHeight": "1.4", "fontWeight": "500"}],
+                    "hero": ["clamp(3rem, 6vw, 5.5rem)", {"lineHeight": "1.1", "fontWeight": "700"}],
+                    "hero-italic": ["clamp(3rem, 6vw, 5.5rem)", {"lineHeight": "1.1", "fontWeight": "300"}],
+                    "body": ["1rem", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "display": ["clamp(2rem, 4vw, 3rem)", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "mono-data": ["0.875rem", {"lineHeight": "1.4", "fontWeight": "500"}],
+                    "micro": ["0.75rem", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "subheading": ["1.125rem", {"lineHeight": "1.5", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .adire-overlay {
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0l30 30-30 30L0 30z' fill='%23F5831F' fill-opacity='0.04'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="bg-oracle-void text-text-primary font-body antialiased selection:bg-amber-500/30">
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full w-sidebar-width bg-oracle-charcoal border-r border-oracle-ash flex flex-col h-full py-6 z-40">
+<div class="px-6 mb-8">
+<h1 class="font-hero-italic text-subheading italic text-amber-500">Naija Oracle</h1>
+<p class="font-micro text-micro text-text-secondary">Consumer Insights</p>
+</div>
+<nav class="flex-1 space-y-1">
+<div class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-body text-body">Dashboard</span>
+</div>
+<div class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+<span class="font-body text-body">Review Simulator</span>
+</div>
+<div class="flex items-center gap-3 bg-oracle-smoke text-amber-500 border-l-3 border-amber-500 px-4 py-3 transition-all">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-body text-body">Recommendations</span>
+</div>
+<div class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="group">group</span>
+<span class="font-body text-body">Persona Profiles</span>
+</div>
+<div class="flex items-center gap-3 text-text-secondary px-4 py-3 hover:bg-oracle-smoke hover:text-text-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-body text-body">Settings</span>
+</div>
+</nav>
+<div class="px-4 mt-auto">
+<button class="w-full bg-amber-500 hover:bg-amber-300 text-oracle-void font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+                New Simulation
+            </button>
+<div class="flex items-center gap-3 text-text-secondary px-4 py-3 mt-4 hover:text-text-primary transition-all cursor-pointer">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+<span class="font-micro text-micro">Help Center</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-sidebar-width h-screen flex flex-col md:flex-row adire-overlay">
+<!-- Context Panel (Left 40%) -->
+<section class="w-full md:w-[40%] h-full border-r border-oracle-ash bg-oracle-charcoal/50 flex flex-col overflow-y-auto">
+<div class="p-8 space-y-8">
+<div>
+<h2 class="font-display text-heading text-amber-500 mb-2">Active Persona</h2>
+<p class="text-text-secondary font-body">Defining the cultural and economic filter for this recommendation loop.</p>
+</div>
+<!-- Persona Card -->
+<div class="bg-oracle-charcoal border-l-4 border-amber-500 p-6 rounded-r-lg shadow-sm">
+<div class="flex items-center gap-4 mb-6">
+<img alt="Teniola" class="w-16 h-16 rounded-full border-2 border-oracle-ash object-cover" data-alt="A sophisticated close-up portrait of a young Nigerian woman in professional attire, lit by warm, golden-hour sunlight in a modern Lagos office setting. The aesthetic is clean and high-contrast, featuring rich skin tones and a minimalist background that emphasizes an expert persona. The mood is confident and knowledgeable, aligned with the Oracle brand's premium, technical identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaGBjDhwPEoszalJsW9V3c620Phvl6RSgIvhyH-0ODtSECtvk56-B98RegWd-TRnwOmuAqzac3s9pQIUg8FB5tZSR-WD3vz8d41ikYH69M3koAjDjRH2oI6QEByUkWuKYQMW6sZqWhpSQGCqvIXEPeL_QYZcvlLo43TGrDyvx1VZDoA0oZ81arduHEazndjquyhyxbJaTl9SANlAk7fTNy77pNonQAnjNxuyqFJmByIEkERVjrEuE_EUqe970aAe2HHbN6oayxvaU"/>
+<div>
+<h3 class="font-heading text-subheading text-text-primary">Teniola, "The Tech-Baddie"</h3>
+<p class="font-micro text-micro text-amber-500">Professional • Lekki Phase 1</p>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<span class="text-text-tertiary font-micro uppercase tracking-wider">Mood</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-500 text-sm" data-icon="celebration">celebration</span>
+<span class="text-text-secondary font-body">Like Owambe DJ</span>
+</div>
+</div>
+<div class="space-y-1">
+<span class="text-text-tertiary font-micro uppercase tracking-wider">Budget</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-500 text-sm" data-icon="payments">payments</span>
+<span class="text-text-secondary font-body">Premium Shells</span>
+</div>
+</div>
+<div class="col-span-2 space-y-1">
+<span class="text-text-tertiary font-micro uppercase tracking-wider">Current Location</span>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-amber-500 text-sm" data-icon="location_on">location_on</span>
+<span class="text-text-secondary font-body">Victoria Island, Lagos</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Live Metrics Tracker -->
+<div class="bg-oracle-charcoal border border-oracle-ash p-6 rounded-lg">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-heading text-body text-text-primary">Performance Metrics</h3>
+<span class="bg-green-500/10 text-green-500 font-mono-data text-micro px-2 py-1 rounded border border-green-500/20">LIVE</span>
+</div>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between items-end mb-2">
+<span class="text-text-secondary font-micro">NDCG@10 Tracking</span>
+<span class="text-amber-500 font-mono-data text-heading">0.892</span>
+</div>
+<div class="w-full bg-oracle-ash h-1.5 rounded-full overflow-hidden">
+<div class="bg-amber-500 h-full w-[89.2%]"></div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-oracle-smoke p-4 rounded border border-oracle-ash">
+<span class="block text-text-tertiary font-micro mb-1">BERTScore</span>
+<span class="text-amber-500 font-mono-data text-subheading">0.941</span>
+</div>
+<div class="bg-oracle-smoke p-4 rounded border border-oracle-ash">
+<span class="block text-text-tertiary font-micro mb-1">CVI Rating</span>
+<span class="text-terra-500 font-mono-data text-subheading">A+</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Simulation Progress -->
+<div class="space-y-4">
+<h3 class="font-heading text-body text-text-primary">Contextual Constraints</h3>
+<div class="space-y-2">
+<div class="flex items-center gap-3 p-3 bg-oracle-smoke/50 rounded border border-oracle-ash">
+<span class="material-symbols-outlined text-amber-500" data-icon="done_all">done_all</span>
+<span class="font-micro text-text-secondary">Pidgin Density Filter: 15%</span>
+</div>
+<div class="flex items-center gap-3 p-3 bg-oracle-smoke/50 rounded border border-oracle-ash">
+<span class="material-symbols-outlined text-amber-500" data-icon="done_all">done_all</span>
+<span class="font-micro text-text-secondary">Cultural Relevance Weights: Active</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Chat Playground (Right 60%) -->
+<section class="w-full md:w-[60%] h-full flex flex-col bg-oracle-void">
+<!-- Top Bar -->
+<header class="h-16 px-8 border-b border-oracle-ash flex justify-between items-center z-10 bg-oracle-void/80 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+<span class="font-heading text-body">Recommendation Loop: #4092</span>
+</div>
+<div class="flex gap-4">
+<button class="text-text-secondary hover:text-amber-500 transition-colors">
+<span class="material-symbols-outlined" data-icon="download">download</span>
+</button>
+<button class="text-text-secondary hover:text-amber-500 transition-colors">
+<span class="material-symbols-outlined" data-icon="refresh">refresh</span>
+</button>
+</div>
+</header>
+<!-- Chat History -->
+<div class="flex-1 overflow-y-auto p-8 space-y-8">
+<!-- User Message -->
+<div class="flex justify-end">
+<div class="max-w-[80%] bg-oracle-charcoal text-text-primary p-4 rounded-2xl rounded-tr-none border border-oracle-ash">
+<p class="font-body">Oracle, I need a spot for dinner tonight. Something high-end but with a <span class="italic text-amber-500">proper Lagos groove</span>. No boring fine dining.</p>
+</div>
+</div>
+<!-- AI Response -->
+<div class="flex justify-start">
+<div class="max-w-[90%] space-y-4">
+<div class="flex items-center gap-2 mb-2">
+<div class="w-8 h-8 rounded bg-amber-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-oracle-void text-sm" data-icon="bolt">bolt</span>
+</div>
+<span class="font-heading text-micro uppercase tracking-widest text-amber-500">Oracle Intelligence</span>
+</div>
+<div class="bg-oracle-smoke text-text-primary p-5 rounded-2xl rounded-tl-none border border-oracle-ash">
+<p class="font-body mb-4">I understand, Teniola. You're looking for that "Luxe-Afrobeats" intersection. Based on your current mood and budget, I've curated three spots in VI that hit the mark perfectly.</p>
+<!-- Recommendation Cards Stack -->
+<div class="space-y-4">
+<!-- Card 1 -->
+<div class="bg-oracle-charcoal border border-oracle-ash rounded-xl overflow-hidden group">
+<div class="p-4 flex gap-4">
+<div class="w-20 h-20 bg-oracle-ash rounded overflow-hidden flex-shrink-0">
+<img alt="Restaurant" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="A luxurious interior of a modern African-fusion restaurant at night. The lighting is low and moody with warm terracotta accents. Rich textures like dark wood and velvet are visible, creating a high-end atmosphere. The image captures the vibrant yet sophisticated energy of Lagos night life." src="https://lh3.googleusercontent.com/aida-public/AB6AXuALs2yxSTpT-x1tP4DwfNehnSrTom3BNw3shiIWFP4nrsEkXA1TYjd2fY44rZVSjI1Xqeoqj99X-olovS8y7bsogLQeX0vky1hIpi0BohFx-W2muFjvNMnIugC7wQvzqcvzU8OSGQvUtn_GmJc6ZlHGWN_3SXsjJpNYUYIhVTeVQtj3tZ4Xlh8BsqPyHA4Yy34eS2ywGM7CSYqbw0fXoqpLGG9nAQeeUtgJPM_6fK1I0TaDKHskOzSW5x2MGl_rxE3TUV92rA6B8ys"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-heading text-body text-text-primary">The Yellow Chilli</h4>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-text-tertiary text-xs" data-icon="star">star</span>
+<span class="text-text-tertiary font-mono-data text-micro ml-2">4.2 (1.2k)</span>
+</div>
+</div>
+<div class="bg-terra-500/10 border border-terra-500/20 text-terra-500 font-micro px-2 py-0.5 rounded">
+                                                    0.8km away
+                                                </div>
+</div>
+<!-- Why This Toggle -->
+<div class="mt-4 border-t border-oracle-ash pt-3">
+<button class="flex items-center gap-2 text-amber-500 font-micro uppercase tracking-tighter hover:text-amber-300 transition-colors">
+                                                    Why this recommendation?
+                                                    <span class="material-symbols-outlined text-xs" data-icon="expand_more">expand_more</span>
+</button>
+<p class="mt-2 text-text-secondary text-micro italic leading-relaxed">
+                                                    Matches your "Owambe DJ" mood with high-energy evening service and <span class="bg-amber-500/10 px-1 rounded not-italic text-amber-500">Premium Seafood Okro</span> that hits every cultural note you prefer.
+                                                </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-oracle-charcoal border border-oracle-ash rounded-xl overflow-hidden group opacity-80">
+<div class="p-4 flex gap-4">
+<div class="w-20 h-20 bg-oracle-ash rounded overflow-hidden flex-shrink-0">
+<img alt="Restaurant" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" data-alt="Close up of a premium cocktail on a dark textured bar counter, illuminated by a single warm spotlight. The background is a soft blur of an upscale Lagos lounge. The aesthetic is modern-cultural, balancing technical precision with organic warmth." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAxqGzGVaE4HtUAMsQmtDofA9Xi023ed_UPcC_n8amJrCJ55kp0x6qNV1iILeH0veRkVTwE23PHz2bSv39dbHLr2Ecxj2aUrq6wBZoLnpa8arQsCEggZaq3k8NaObD3vtsbQ0dtJhApWYqFfYGGCJ9_tK7OSA2SlQwW9nsYtQ-Cq8hJXQAmzR2kwrthL-HzgOmjbvSQS-iggKbGKUy2NU6VG2jwYYmwzzQAyRYW0YZRicbY8JG12G62EWr_D8ZsSRFmbWedNfRhWts"/>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h4 class="font-heading text-body text-text-primary">Nok by Alara</h4>
+<div class="bg-terra-500/10 border border-terra-500/20 text-terra-500 font-micro px-2 py-0.5 rounded">
+                                                    1.4km away
+                                                </div>
+</div>
+<div class="flex items-center gap-1 mt-1">
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-amber-500 text-xs" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="text-text-tertiary font-mono-data text-micro ml-2">4.9 (800+)</span>
+</div>
+<div class="mt-4 border-t border-oracle-ash pt-3">
+<button class="flex items-center gap-2 text-text-tertiary font-micro uppercase tracking-tighter">
+                                                    Why this recommendation?
+                                                    <span class="material-symbols-outlined text-xs" data-icon="expand_more">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Generator Cursor -->
+<div class="flex items-center gap-2">
+<span class="w-1.5 h-4 bg-amber-500 animate-pulse"></span>
+<span class="font-micro text-text-tertiary italic">Oracle is refining secondary options...</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Input Area -->
+<footer class="p-8 border-t border-oracle-ash bg-oracle-charcoal/30 backdrop-blur-sm">
+<div class="relative max-w-4xl mx-auto">
+<input class="w-full bg-oracle-void border border-oracle-ash rounded-xl px-6 py-4 text-text-primary focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all font-body" placeholder="Ask for specific cultural nuances (e.g., 'no loud music', 'indoor seating')" type="text"/>
+<div class="absolute right-3 top-1/2 -translate-y-1/2 flex gap-2">
+<button class="w-10 h-10 flex items-center justify-center rounded-lg text-text-secondary hover:text-amber-500 transition-colors">
+<span class="material-symbols-outlined" data-icon="mic">mic</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-lg bg-amber-500 text-oracle-void hover:bg-amber-300 transition-all shadow-lg shadow-amber-500/10">
+<span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+</div>
+</div>
+<div class="mt-4 flex justify-center gap-6">
+<div class="flex items-center gap-2 cursor-pointer group">
+<span class="material-symbols-outlined text-text-tertiary group-hover:text-amber-500 text-sm" data-icon="tune">tune</span>
+<span class="text-micro text-text-tertiary group-hover:text-text-secondary">Persona Filter: ON</span>
+</div>
+<div class="flex items-center gap-2 cursor-pointer group">
+<span class="material-symbols-outlined text-text-tertiary group-hover:text-amber-500 text-sm" data-icon="auto_awesome">auto_awesome</span>
+<span class="text-micro text-text-tertiary group-hover:text-text-secondary">Cultural Weights: MAX</span>
+</div>
+</div>
+</footer>
+</section>
+</main>
+<!-- Global Footer Mini (Mobile Hidden) -->
+<footer class="ml-sidebar-width hidden md:flex flex-row justify-between items-center px-margin-page py-4 w-[calc(100%-240px)] border-t border-oracle-ash bg-oracle-void z-50">
+<p class="font-micro text-micro text-text-tertiary italic">© 2024 Naija Oracle. Built for Balogun, Optimized for Global.</p>
+<div class="flex gap-6">
+<a class="font-micro text-micro text-text-tertiary hover:text-amber-300 transition-colors" href="#">Privacy Policy</a>
+<a class="font-micro text-micro text-text-tertiary hover:text-amber-300 transition-colors" href="#">Terms of Service</a>
+<a class="font-micro text-micro text-text-tertiary hover:text-amber-300 transition-colors" href="#">API Docs</a>
+</div>
+</footer>
+</body></html>

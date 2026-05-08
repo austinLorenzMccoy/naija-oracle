@@ -1,0 +1,124 @@
+version: '3.9'
+
+services:
+  # Backend API
+  backend:
+    build: ./backend
+    container_name: naija_oracle_backend
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - database
+    volumes:
+      - ./backend:/app
+      - backend_cache:/app/cache
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Frontend
+  frontend:
+    build: ./frontend
+    container_name: naija_oracle_frontend
+    environment:
+      - VITE_SUPABASE_URL=${SUPABASE_URL}
+      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - VITE_API_URL=http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    restart: unless-stopped
+
+  # Database (PostgreSQL)
+  database:
+    image: postgres:15-alpine
+    container_name: naija_oracle_db
+    environment:
+      - POSTGRES_DB=naija_oracle
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: naija_oracle_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # MLflow for experiment tracking
+  mlflow:
+    image: python:3.11-slim
+    container_name: naija_oracle_mlflow
+    working_dir: /app
+    command: >
+      bash -c "pip install mlflow psycopg2-binary &&
+               mlflow server --host 0.0.0.0 --port 5000 
+               --backend-store-uri postgresql://postgres:${POSTGRES_PASSWORD}@database:5432/naija_oracle
+               --default-artifact-root /app/mlflow/artifacts"
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    volumes:
+      - mlflow_artifacts:/app/mlflow/artifacts
+    restart: unless-stopped
+
+  # Jupyter for ML development
+  jupyter:
+    image: python:3.11-slim
+    container_name: naija_oracle_jupyter
+    working_dir: /app
+    command: >
+      bash -c "pip install uv &&
+               uv pip install --system jupyterlab torch transformers scikit-learn pandas matplotlib seaborn &&
+               jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''"
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./ml_training:/app
+      - jupyter_data:/root/.jupyter
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  mlflow_artifacts:
+  backend_cache:
+  jupyter_data:
+
+networks:
+  default:
+    name: naija_oracle_network
