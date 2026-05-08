@@ -1,24 +1,21 @@
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
-import {defineConfig, loadEnv} from 'vite';
+import { defineConfig } from 'vite';
 
-export default defineConfig(({mode}) => {
-  const env = loadEnv(mode, '.', '');
+export default defineConfig(({ mode }) => {
+  const isProduction = mode === 'production';
+  
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      require('@vitejs/plugin-react')(),
+      require('@tailwindcss/vite')()
+    ],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-    },
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
+      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(
+        isProduction ? 'https://naija-oracle.onrender.com/api/v1' : 'http://localhost:8000/api/v1'
+      )
     },
     server: {
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
-    },
+      port: 3000,
+      host: '0.0.0.0'
+    }
   };
 });
