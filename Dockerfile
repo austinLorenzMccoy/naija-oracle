@@ -1,5 +1,29 @@
-# Multi-stage build for backend
-FROM backend as builder
+# Use Python 3.11 slim image
+FROM python:3.11-slim
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements.txt first for better caching
+COPY backend/requirements.txt ./
+
+# Install Python dependencies with pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY backend/ .
+
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app \
+    && chown -R app:app /app
+USER app
 
 # Expose port
 EXPOSE 8000
