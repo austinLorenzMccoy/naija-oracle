@@ -11,14 +11,11 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Install UV package manager
-RUN pip install --no-cache-dir uv
+# Copy requirements.txt first for better caching
+COPY requirements.txt ./
 
-# Copy pyproject.toml first for better caching
-COPY pyproject.toml ./
-
-# Install Python dependencies with UV
-RUN uv pip install --system -e .
+# Install Python dependencies with pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
