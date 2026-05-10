@@ -63,20 +63,22 @@ Existing LLM-based review and recommendation systems suffer from three compoundi
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   NAIJA ORACLE                       │
-│                                                     │
-│  ┌───────────────┐        ┌───────────────────────┐ │
-│  │  AGENT A      │        │  AGENT B              │ │
-│  │  Persona      │        │  Recommendation       │ │
-│  │  Simulator    │        │  Engine               │ │
-│  └──────┬────────┘        └──────────┬────────────┘ │
-│         │                            │               │
-│  ┌──────▼────────────────────────────▼────────────┐ │
-│  │          Shared Intelligence Layer              │ │
-│  │  Cultural Context DB · Supabase Vector Store   │ │
-│  │  Groq LLaMA-3.1-70B · RAG Pipeline            │ │
+         ┌─────────────────────────────────────────────┐
+         │                   NAIJA ORACLE                       │
+         │                                                     │
+         │  ┌───────────────┐        ┌───────────────────────┐ │
+         │  │  AGENT A      │        │  AGENT B              │ │
+         │  │  Persona      │        │  Recommendation       │ │
+         │  │  Simulator    │        │  Engine               │ │
+         │  └──────┬────────┘        └──────────┬────────────┘ │
+         │         │                            │               │
+         │  ┌──────▼────────────────────────────▼────────────┐ │
+         │  │          Shared Intelligence Layer              │ │
+         │  │  Cultural Context DB · Supabase Vector Store   │ │
+         │  │  Groq LLaMA-3.1-70B · RAG Pipeline            │ │
+         └─────────────────────────────────────────────┘
 ```
+
 ### **Data Pipeline Architecture**
 ```mermaid
 graph LR
