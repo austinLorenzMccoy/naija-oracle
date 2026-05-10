@@ -1,0 +1,87 @@
+schema: '2.0'
+stages:
+  download_yelp:
+    cmd: python scripts/download_yelp_sample.py --output data/raw/yelp_review_sample.json
+      --sample-size 5000
+    deps:
+    - path: scripts/download_yelp_sample.py
+      hash: md5
+      md5: 9cf2d1ea63d4a16445249fedcfa6f49e
+      size: 7619
+    outs:
+    - path: data/raw/yelp_review_sample.json
+      hash: md5
+      md5: c4d51a8dfb5d5cc4916e0fd2bf332494
+      size: 2685997
+    - path: metrics/yelp_stats.json
+      hash: md5
+      md5: 1b19f3a61db12c40daa870c6e7804f9d
+      size: 181
+  generate_personas:
+    cmd: python scripts/generate_personas.py --count 500 --output data/processed/personas.json
+    deps:
+    - path: scripts/generate_personas.py
+      hash: md5
+      md5: e038bd9065adb7ed67c63765a44e346b
+      size: 11208
+    outs:
+    - path: data/processed/personas.json
+      hash: md5
+      md5: 3366239b15db9bb6b536acba1145bd2e
+      size: 469568
+    - path: metrics/persona_stats.json
+      hash: md5
+      md5: 466e251df5978f3f96cac087f21bab6b
+      size: 433
+  build_cvi:
+    cmd: python scripts/build_cvi.py --output data/processed/cvi.csv
+    deps:
+    - path: scripts/build_cvi.py
+      hash: md5
+      md5: df8118c76db0244f62da4f0aad414a86
+      size: 18768
+    outs:
+    - path: data/processed/cvi.csv
+      hash: md5
+      md5: 84ce2c79fa0ad5fda7bd7c0025b9420c
+      size: 2776
+    - path: data/processed/cvi.json
+      hash: md5
+      md5: 24aeea88241ad22b6df0f286d31480ed
+      size: 8070
+    - path: metrics/cvi_stats.json
+      hash: md5
+      md5: 705146606c47c18519f183d9a01d2cd4
+      size: 287
+  process_training_data:
+    cmd: python ml_training/process_training_data.py
+    deps:
+    - path: data/processed/cvi.json
+      hash: md5
+      md5: 24aeea88241ad22b6df0f286d31480ed
+      size: 8070
+    - path: data/processed/personas.json
+      hash: md5
+      md5: 3366239b15db9bb6b536acba1145bd2e
+      size: 469568
+    - path: data/raw/yelp_review_sample.json
+      hash: md5
+      md5: c4d51a8dfb5d5cc4916e0fd2bf332494
+      size: 2685997
+    - path: ml_training/process_training_data.py
+      hash: md5
+      md5: a8b6e23871608ac1c55b29d172ea44e1
+      size: 6557
+    outs:
+    - path: data/processed/test_data.json
+      hash: md5
+      md5: b20cf2ff89e467e63939ea7ea53215a8
+      size: 1718811
+    - path: data/processed/training_data.json
+      hash: md5
+      md5: 7a2bbac738032c991e296c3240d9da87
+      size: 6873303
+    - path: metrics/data_processing_stats.json
+      hash: md5
+      md5: a091488d7906182119c84e0018a67752
+      size: 147

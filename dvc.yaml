@@ -1,0 +1,95 @@
+# DVC Pipeline for Naija Oracle Data Processing
+# This defines the complete data pipeline from raw data to trained models
+
+stages:
+  # Phase 1: Data Collection
+  download_yelp:
+    cmd: python scripts/download_yelp_sample.py --output data/raw/yelp_review_sample.json --sample-size 5000
+    deps:
+      - scripts/download_yelp_sample.py
+    outs:
+      - data/raw/yelp_review_sample.json
+    metrics:
+      - metrics/yelp_stats.json
+
+  generate_personas:
+    cmd: python scripts/generate_personas.py --count 500 --output data/processed/personas.json
+    deps:
+      - scripts/generate_personas.py
+    outs:
+      - data/processed/personas.json
+    metrics:
+      - metrics/persona_stats.json
+
+  build_cvi:
+    cmd: python scripts/build_cvi.py --output data/processed/cvi.csv
+    deps:
+      - scripts/build_cvi.py
+    outs:
+      - data/processed/cvi.csv
+      - data/processed/cvi.json
+    metrics:
+      - metrics/cvi_stats.json
+
+  # Phase 2: Data Processing
+  process_training_data:
+    cmd: python ml_training/process_training_data.py
+    deps:
+      - ml_training/process_training_data.py
+      - data/raw/yelp_review_sample.json
+      - data/processed/personas.json
+      - data/processed/cvi.json
+    outs:
+      - data/processed/training_data.json
+      - data/processed/test_data.json
+    metrics:
+      - metrics/data_processing_stats.json
+
+  # Phase 3: Model Training
+  train_persona_simulator:
+    cmd: python ml_training/train_persona_simulator.py
+    deps:
+      - ml_training/train_persona_simulator.py
+      - data/processed/training_data.json
+      - data/processed/cvi.json
+    outs:
+      - models/persona_simulator/
+    metrics:
+      - metrics/persona_training_metrics.json
+    plots:
+      - ml_training_plots/plots/persona_training_curves.png
+
+  train_recommendation_ranker:
+    cmd: python ml_training/train_recommendation_ranker.py
+    deps:
+      - ml_training/train_recommendation_ranker.py
+      - data/processed/training_data.json
+    outs:
+      - models/recommendation_ranker/
+    metrics:
+      - metrics/recommendation_training_metrics.json
+    plots:
+      - ml_training/plots/recommendation_training_curves.png
+
+  # Phase 4: Evaluation
+  evaluate_models:
+    cmd: python ml_training/evaluate_models.py
+    deps:
+      - ml_training/evaluate_models.py
+      - models/persona_simulator/
+      - models/recommendation_ranker/
+      - data/processed/test_data.json
+    metrics:
+      - metrics/evaluation_metrics.json
+    plots:
+      - ml_training/plots/evaluation_results.png
+
+  # Phase 5: Integration Test
+  test_integration:
+    cmd: python ml_training/test_integration.py
+    deps:
+      - ml_training/test_integration.py
+      - models/persona_simulator/
+      - models/recommendation_ranker/
+    metrics:
+      - metrics/integration_test_results.json

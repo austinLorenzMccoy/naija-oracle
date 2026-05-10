@@ -1,0 +1,151 @@
+'use client'
+
+import Sidebar from '@/components/sidebar'
+import Header from '@/components/header'
+import { Send, MapPin } from 'lucide-react'
+
+const recommendations = [
+  {
+    name: 'Yellow Chilli',
+    rating: 4.2,
+    reviews: '1.2k',
+    distance: '0.8km away',
+    price: '₦₦₦',
+    reason: 'Matches your "Owambe DJ" mood with high-energy evening service and Premium Seafood Okro, that hits every cultural note you prefer.',
+    highlighted: ['Premium Seafood Okro']
+  },
+  {
+    name: 'Nok by Alara',
+    rating: 4.9,
+    reviews: '884+',
+    distance: '1.4km away',
+    price: '₦₦',
+    reason: 'WHY THIS RECOMMENDATION?',
+    expanded: true
+  }
+]
+
+export default function Recommend() {
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className="ml-60 flex-1 flex flex-col">
+        <Header />
+
+        <div className="flex-1 overflow-hidden bg-oracle-void flex">
+          {/* Left Panel: Persona Context */}
+          <section className="w-80 bg-oracle-charcoal border-r border-oracle-ash p-8 overflow-y-auto">
+            <div className="mb-8">
+              <h2 className="text-lg font-bold text-text-primary mb-2">Active Context</h2>
+              <p className="text-text-secondary text-sm">Teniola, "The Tech-Baddie"</p>
+            </div>
+
+            <div className="card-accent-amber p-6 mb-8">
+              <div className="w-16 h-16 rounded-full bg-oracle-amber-500/20 flex items-center justify-center text-oracle-amber-500 font-bold text-2xl mx-auto mb-4">
+                T
+              </div>
+              <p className="text-center font-medium mb-1">Teniola O.</p>
+              <p className="text-center text-oracle-amber-500 text-xs uppercase mb-6">Professional • Lekki Phase 1</p>
+
+              <div className="space-y-3 pt-6 border-t border-oracle-ash">
+                <div>
+                  <p className="text-text-tertiary text-xs uppercase mb-1">Current Mood</p>
+                  <input
+                    type="text"
+                    placeholder="e.g., celebratory"
+                    className="w-full bg-oracle-void border border-oracle-ash text-text-primary px-3 py-2 rounded text-sm focus:border-oracle-amber-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <p className="text-text-tertiary text-xs uppercase mb-1">Budget</p>
+                  <input
+                    type="text"
+                    placeholder="e.g., ₦5k-₦15k"
+                    className="w-full bg-oracle-void border border-oracle-ash text-text-primary px-3 py-2 rounded text-sm focus:border-oracle-amber-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <p className="text-text-tertiary text-xs uppercase mb-1">Location Radius</p>
+                  <input
+                    type="text"
+                    placeholder="e.g., Lekki"
+                    className="w-full bg-oracle-void border border-oracle-ash text-text-primary px-3 py-2 rounded text-sm focus:border-oracle-amber-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="card-accent p-6 mb-8">
+              <p className="text-text-secondary text-xs uppercase tracking-wide mb-3">NDCG@10 Score</p>
+              <div className="relative h-2 bg-oracle-ash rounded overflow-hidden mb-2">
+                <div className="h-full bg-oracle-green-500" style={{ width: '82%' }} />
+              </div>
+              <p className="font-mono text-oracle-green-500 text-sm">0.847</p>
+            </div>
+          </section>
+
+          {/* Right Panel: Chat */}
+          <section className="flex-1 bg-oracle-void p-8 overflow-y-auto">
+            <div className="max-w-2xl mx-auto space-y-6">
+              {/* Chat Messages */}
+              <div className="bg-oracle-charcoal border border-oracle-ash p-6 rounded-lg">
+                <p className="text-text-secondary text-sm mb-4">
+                  <span className="text-oracle-amber-500 font-bold">[Oracle]</span>
+                </p>
+                <p className="text-text-primary leading-relaxed mb-4">
+                  I understand, Teniola. You're looking for that "Luxe-Afrobeats" intersection. Based on your current mood and budget, I've curated three spots in VI that hit the mark perfectly.
+                </p>
+
+                {/* Recommendation Cards */}
+                <div className="space-y-4">
+                  {recommendations.map((rec, i) => (
+                    <div key={i} className="bg-oracle-void border border-oracle-ash rounded-lg p-4 hover:border-oracle-amber-500 transition-colors cursor-pointer">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-bold text-text-primary">{rec.name}</h4>
+                          <div className="flex gap-3 mt-2">
+                            <div className="flex gap-1">
+                              {[...Array(5)].map((_, j) => (
+                                <span key={j} className={j < Math.floor(rec.rating) ? 'text-oracle-amber-500' : 'text-oracle-ash'}>★</span>
+                              ))}
+                              <span className="text-text-secondary text-xs ml-1">{rec.reviews}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-oracle-amber-500 font-medium text-sm">{rec.distance}</p>
+                          <p className="text-text-secondary text-xs mt-1">{rec.price}</p>
+                        </div>
+                      </div>
+
+                      <p className="text-text-secondary text-sm mb-2">{rec.reason}</p>
+                      {rec.expanded && (
+                        <button className="text-oracle-amber-500 hover:text-oracle-amber-300 text-xs font-medium">
+                          Why this? ▼
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Input */}
+              <div className="mt-auto">
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    placeholder="Ask for specific cultural nuances (e.g., 'no loud music', 'indoor seating')..."
+                    className="flex-1 bg-oracle-charcoal border border-oracle-ash text-text-primary px-4 py-3 rounded-lg focus:border-oracle-amber-500 focus:outline-none"
+                  />
+                  <button className="bg-oracle-amber-500 text-oracle-void px-4 py-3 rounded-lg hover:bg-oracle-amber-300 transition-colors">
+                    <Send className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+  )
+}

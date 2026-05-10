@@ -1,0 +1,8 @@
+{
+  "total_examples": 5000,
+  "train_examples": 4000,
+  "test_examples": 1000,
+  "num_personas": 500,
+  "cvi_entries": 15,
+  "avg_rating": 3.8808
+}

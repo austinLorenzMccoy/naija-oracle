@@ -1,0 +1,136 @@
+# DVC Configuration for Naija Oracle ML Pipeline
+
+stages:
+  # Data generation and preprocessing
+  prepare_data:
+    cmd: uv run python scripts/prepare_data.py
+    deps:
+      - scripts/prepare_data.py
+    params:
+      - prepare.num_personas
+      - prepare.num_products
+      - prepare.cvi_expansion
+    outs:
+      - data/persona_training_data.json
+      - data/recommendation_training_data.csv
+      - data/cvi_anchors.json
+
+  # Task A - Persona Simulator Training
+  train_persona_simulator:
+    cmd: uv run python train_persona_simulator.py
+      --model ${train.base_model}
+      --data data/persona_training_data.json
+      --output models/persona_simulator
+      --epochs ${train.persona_epochs}
+      --learning-rate ${train.persona_lr}
+      --batch-size ${train.persona_batch_size}
+    deps:
+      - train_persona_simulator.py
+      - data/persona_training_data.json
+      - data/cvi_anchors.json
+    params:
+      - train.base_model
+      - train.persona_epochs
+      - train.persona_lr
+      - train.persona_batch_size
+      - train.temperature
+      - train.max_length
+    metrics:
+      - metrics/persona_simulator.json:
+          cache: false
+    outs:
+      - models/persona_simulator:
+          cache: false
+      - mlruns/persona_simulator:
+          cache: false
+
+  # Task B - Recommendation Engine Training
+  train_recommendation_engine:
+    cmd: uv run python train_recommendation_engine.py
+      --data data/recommendation_training_data.csv
+      --output models/recommendation_engine
+      --epochs ${train.recommendation_epochs}
+      --lr ${train.recommendation_lr}
+      --hidden-dims ${train.hidden_dims}
+    deps:
+      - train_recommendation_engine.py
+      - data/recommendation_training_data.csv
+    params:
+      - train.recommendation_epochs
+      - train.recommendation_lr
+      - train.hidden_dims
+      - train.dropout
+    metrics:
+      - metrics/recommendation_engine.json:
+          cache: false
+    outs:
+      - models/recommendation_engine:
+          cache: false
+      - mlruns/recommendation_engine:
+          cache: false
+
+  # Evaluation
+  evaluate:
+    cmd: uv run python scripts/evaluate_models.py
+      --persona-model models/persona_simulator
+      --recommendation-model models/recommendation_engine
+      --test-data data/test_data.json
+    deps:
+      - scripts/evaluate_models.py
+      - models/persona_simulator
+      - models/recommendation_engine
+      - data/test_data.json
+    metrics:
+      - metrics/evaluation_results.json:
+          cache: false
+    outs:
+      - reports/evaluation_report.html
+
+  # Hyperparameter optimization
+  hyperopt_persona:
+    cmd: uv run python scripts/hyperopt_persona.py
+      --n-trials ${optuna.trials}
+      --timeout ${optuna.timeout}
+    deps:
+      - scripts/hyperopt_persona.py
+      - data/persona_training_data.json
+    params:
+      - optuna.trials
+      - optuna.timeout
+    metrics:
+      - metrics/hyperopt_persona.json:
+          cache: false
+    outs:
+      - optuna/persona_study.pkl
+
+  hyperopt_recommendation:
+    cmd: uv run python scripts/hyperopt_recommendation.py
+      --n-trials ${optuna.trials}
+      --timeout ${optuna.timeout}
+    deps:
+      - scripts/hyperopt_recommendation.py
+      - data/recommendation_training_data.csv
+    params:
+      - optuna.trials
+      - optuna.timeout
+    metrics:
+      - metrics/hyperopt_recommendation.json:
+          cache: false
+    outs:
+      - optuna/recommendation_study.pkl
+
+# Plots for visualization
+plots:
+  - training_curves:
+      x: epoch
+      y:
+        - train_loss
+        - eval_loss
+      template: linear
+  - metric_comparison:
+      x: model
+      y:
+        - bertscore_f1
+        - rouge_l
+        - ndcg_at_10
+      template: bar
