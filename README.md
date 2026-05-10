@@ -60,24 +60,22 @@ Existing LLM-based review and recommendation systems suffer from three compoundi
 
 **Naija Oracle** solves all three with authentic cultural intelligence.
 
-## 🏗️ Architecture
+## 🏗️ Architecture Overview
 
-```
-         ┌─────────────────────────────────────────────┐
-         │                   NAIJA ORACLE                       │
-         │                                                     │
-         │  ┌───────────────┐        ┌───────────────────────┐ │
-         │  │  AGENT A      │        │  AGENT B              │ │
-         │  │  Persona      │        │  Recommendation       │ │
-         │  │  Simulator    │        │  Engine               │ │
-         │  └──────┬────────┘        └──────────┬────────────┘ │
-         │         │                            │               │
-         │  ┌──────▼────────────────────────────▼────────────┐ │
-         │  │          Shared Intelligence Layer              │ │
-         │  │  Cultural Context DB · Supabase Vector Store   │ │
-         │  │  Groq LLaMA-3.1-70B · RAG Pipeline            │ │
-         └─────────────────────────────────────────────┘
-```
+![Naija Oracle Architecture](assets/naija_oracle_architecture.jpg)
+
+### **System Components**
+- **Frontend**: React + Next.js application with modern UI
+- **Backend**: FastAPI with persona simulator and recommendation engine
+- **Database**: Supabase with PostgreSQL and pgvector
+- **ML Pipeline**: DVC workflow with PyTorch training
+- **External Services**: Groq LLaMA-3.1-70B API integration
+
+### **Data Flow**
+1. **Data Collection**: Yelp dataset → Synthetic personas → Cultural Voice Index
+2. **ML Training**: Processed data → Neural network models
+3. **Backend Integration**: Conditional model loading with Groq fallback
+4. **User Interface**: Real-time review generation and recommendations
 
 ### **Data Pipeline Architecture**
 ```mermaid
