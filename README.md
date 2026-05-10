@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🧠 Naija Oracle
+# 🧠 Naija Oracle: Complete LLM Agent System for Nigerian Cultural Intelligence
 
 **The oracle that speaks Naija**
 
@@ -89,39 +89,36 @@ graph LR
     subgraph "Data Processing"
         D[Download & Sample<br/>Yelp Script]
         E[Generate Personas<br/>Groq/Mock]
-        F[Build CVI<br/>Cultural Voice Index]
     end
     
     subgraph "ML Training"
-        G[Process Training Data<br/>Feature Engineering]
-        H[Train Persona Simulator<br/>PyTorch Neural Net]
-        I[Train Recommendation Ranker<br/>PyTorch Model]
+        F[Process Training Data<br/>Feature Engineering]
+        G[Train Persona Simulator<br/>PyTorch Neural Net]
+        H[Train Recommendation Ranker<br/>PyTorch Model]
     end
     
     subgraph "Model Deployment"
-        J[Conditional Loading<br/>Backend Integration]
-        K[Fallback to Groq<br/>API Generation]
-        L[Model Artifacts<br/>MLflow Registry]
+        I[Conditional Loading<br/>Backend Integration]
+        J[Fallback to Groq<br/>API Generation]
     end
     
     A --> D
+    A --> E
+    A --> F
     B --> F
-    C --> E
-    D --> G
-    E --> G
-    F --> G
-    G --> H
+    B --> G
+    B --> H
+    C --> F
+    C --> G
+    C --> H
+    F --> I
+    F --> J
     G --> I
+    G --> J
+    H --> I
     H --> J
     I --> J
     J --> K
-    H --> L
-    I --> L
-    
-    style A fill:#e3f2fd
-    style D fill:#f1f8e9
-    style G fill:#fff8e1
-    style J fill:#fce4ec
 ```
 
 ### **Project Structure**
@@ -196,6 +193,10 @@ naija-oracle/
 ├── 📁 mlruns/                      # MLflow experiment tracking
 ├── 📁 .dvc/                        # DVC configuration
 ├── 📁 .venv/                       # Python virtual environment
+│
+├── 📁 assets/                      # Static assets
+│   ├── naija_oracle_architecture.jpg
+│   └── naija_oracle_logo.jpg
 │
 ├── 📄 dvc.yaml                     # DVC pipeline configuration
 ├── 📄 dvc.lock                     # DVC execution state
@@ -439,32 +440,6 @@ uv run python train_persona_simulator.py
 - **Redis** - Caching layer
 - **Nginx** - Reverse proxy (production)
 
-## 📁 Project Structure
-
-```
-naija_oracle/
-├── backend/                    # FastAPI backend
-│   ├── app/                   # Application code
-│   │   ├── models/           # Pydantic models
-│   │   ├── services/         # Business logic
-│   │   ├── routers/          # API endpoints
-│   │   └── ml/               # Evaluation metrics
-│   ├── pyproject.toml        # UV configuration
-│   └── Dockerfile            # Container build
-├── frontend/                  # React frontend
-│   ├── src/                  # Source code
-│   │   ├── components/       # UI components
-│   │   └── lib/             # Utilities
-│   ├── package.json          # Dependencies
-│   └── vite.config.ts        # Build config
-├── ml_training/              # ML pipeline
-│   ├── train_persona_simulator.py
-│   ├── train_recommendation_engine.py
-│   └── pyproject.toml        # ML dependencies
-├── docs/                     # Documentation
-├── docker-compose.yml        # Multi-service setup
-└── README.md                 # This file
-```
 
 ## 🔧 API Documentation
 
