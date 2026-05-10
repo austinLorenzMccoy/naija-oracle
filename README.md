@@ -76,7 +76,7 @@ Existing LLM-based review and recommendation systems suffer from three compoundi
 │  │          Shared Intelligence Layer              │ │
 │  │  Cultural Context DB · Supabase Vector Store   │ │
 │  │  Groq LLaMA-3.1-70B · RAG Pipeline            │ │
-
+```
 ### **Data Pipeline Architecture**
 ```mermaid
 graph LR
@@ -206,17 +206,20 @@ naija-oracle/
 ├── 📄 docker-compose.yml           # Local development setup
 └── 📄 .env.example                  # Environment variables template
 ```
-GROQ_API_KEY=your_new_groq_api_key_here
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_supabase_anon_key
-SUPABASE_SERVICE_KEY=your_supabase_service_key
-DATABASE_URL=postgresql+asyncpg://postgres.your_project@aws-0-us-east-1.pooler.supabase.com:6543/postgres
-DAGSHUB_TOKEN=your_dagshub_token
-DAGSHUB_USERNAME=your_dagshub_username
+
+```bash
+GROQ_API_KEY=your_new_groq_api_key_here 
+SUPABASE_URL=your_supabase_url 
+SUPABASE_ANON_KEY=your_supabase_anon_key 
+SUPABASE_SERVICE_KEY=your_supabase_service_key 
+DATABASE_URL=postgresql+asyncpg://postgres.your_project@aws-0-us-east-1.pooler.supabase.com:6543/postgres 
+DAGSHUB_TOKEN=your_dagshub_token \
+DAGSHUB_USERNAME=your_dagshub_username 
 JWT_SECRET_KEY=your_jwt_secret
 ```
 
 ### **Frontend Deployment (Netlify)**
+
 ```bash
 # 1. Create Netlify account
 # 2. Connect GitHub repository
@@ -563,6 +566,18 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 - **✅ Synthetic Personas**: 500 culturally-diverse Nigerian personas generated
 - **✅ ML Training Pipeline**: Neural network models trained with PyTorch and MLflow tracking
 - **✅ Backend Integration**: Conditional model loading implemented for seamless deployment
+- **✅ Data Tracking Setup**: Local DVC storage configured for reproducibility
+
+#### **Data Tracking Configuration**
+```bash
+# DVC is configured for local storage
+# All data, models, and metrics are tracked
+# Pipeline can be reproduced with: dvc repro
+
+# Optional: Configure remote storage
+# dvc remote add -d origin https://dagshub.com/austinLorenzMccoy/naija-oracle
+# dvc push  # Push to remote storage
+```
 
 #### **Security & Architecture Improvements**
 - **✅ Removed API Key Exposure**: Eliminated `NEXT_PUBLIC_GROQ_API_KEY` from frontend
