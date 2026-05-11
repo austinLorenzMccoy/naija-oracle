@@ -46,7 +46,7 @@ export default function Dashboard() {
       setError(null)
       
       // Fetch metrics from backend
-      const metricsResponse = await fetch('http://localhost:8000/api/v1/eval/metrics')
+      const metricsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8003/api/v1'}/eval/metrics`)
       if (!metricsResponse.ok) {
         throw new Error('Failed to fetch metrics')
       }

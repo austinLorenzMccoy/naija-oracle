@@ -48,7 +48,8 @@ The name is deliberate: an *oracle* knows what you'll say before you say it. "Na
 
 **Frontend**: https://naija-oracle.netlify.app/ \
 **Backend API**: https://naija-oracle.onrender.com/ \
-**DagsHub Repository**: https://dagshub.com/austinLorenzMccoy/naija-oracle
+**DagsHub Repository**: https://dagshub.com/austinLorenzMccoy/naija-oracle \
+**Docker Compose**: Fully containerized multi-service setup
 
 ## 🎯 Problem Solved
 
@@ -150,15 +151,15 @@ naija-oracle/
 │   ├── process_training_data.py   # Data preprocessing script
 │   ├── train_persona_simulator.py # Persona model training
 │   ├── train_recommendation_ranker.py # Recommendation model
+│   ├── train_recommendation_engine.py # Recommendation engine
+│   ├── dvc.yaml                   # DVC pipeline configuration
 │   ├── scripts/                   # Utility scripts
 │   │   ├── evaluate_models.py     # Model evaluation
 │   │   ├── prepare_data.py        # Data preparation
 │   │   └── setup_dvc.py           # DVC initialization
 │   ├── plots/                     # Training visualizations
+│   │   └── ml_training_plots/     # Generated training curves
 │   └── requirements.txt           # ML dependencies
-│
-├── 📁 ml_training_plots/           # Training plots and visualizations
-│   └── plots/                     # Generated training curves
 │
 ├── 📁 scripts/                     # Data collection scripts
 │   ├── download_yelp_sample.py    # Yelp dataset download
@@ -366,12 +367,22 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/naija_oracle
 # Start all services
 docker-compose up --build
 
-# Individual services
-docker-compose up backend      # http://localhost:8000
-docker-compose up frontend     # http://localhost:3000
-docker-compose up jupyter      # http://localhost:8888
-docker-compose up mlflow       # http://localhost:5000
+# Individual services (updated port mappings)
+docker-compose up backend      # http://localhost:9000
+docker-compose up frontend     # http://localhost:3001
+docker-compose up jupyter      # http://localhost:8889
+docker-compose up mlflow       # http://localhost:5002
+docker-compose up database     # localhost:5434
+docker-compose up redis        # localhost:6381
 ```
+
+**Service Port Mapping:**
+- **Frontend**: 3001:3000
+- **Backend**: 9000:8000
+- **Database**: 5434:5432
+- **Redis**: 6381:6379
+- **MLflow**: 5002:5000
+- **Jupyter**: 8889:8888
 
 ### **4. Development Mode**
 
@@ -554,12 +565,20 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 # dvc push  # Push to remote storage
 ```
 
+#### **Docker Containerization Complete**
+- **✅ Frontend Docker Build Fixed**: Resolved LightningCSS native module issues with multi-stage build
+- **✅ Turbopack Configuration**: Fixed Next.js 16 Turbopack compatibility issues
+- **✅ Multi-Service Setup**: Complete Docker Compose with 6 services (Frontend, Backend, Database, Redis, MLflow, Jupyter)
+- **✅ Port Mapping**: Updated all service ports to avoid conflicts
+- **✅ Container Health Checks**: All services configured with proper health monitoring
+
 #### **Security & Architecture Improvements**
 - **✅ Removed API Key Exposure**: Eliminated `NEXT_PUBLIC_GROQ_API_KEY` from frontend
 - **✅ Backend-Only API Calls**: All Groq API calls now route through backend (secure)
 - **✅ Enhanced Navigation**: Added "Back to Dashboard" button to cold-start demo
 - **✅ Error Handling**: Improved error states and user feedback
 - **✅ Mock Removal**: Complete elimination of excessive mock data
+- **✅ Directory Cleanup**: Removed redundant `ml_pipeline` directory
 
 #### **Frontend Enhancements**
 - **✅ Real Backend Integration**: All pages now call live backend APIs

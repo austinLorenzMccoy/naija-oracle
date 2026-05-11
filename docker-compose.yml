@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   # Backend API
   backend:
@@ -13,7 +11,7 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     ports:
-      - "8000:8000"
+      - "9000:8000"
     depends_on:
       - database
     volumes:
@@ -35,7 +33,7 @@ services:
       - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
       - VITE_API_URL=http://localhost:8000
     ports:
-      - "3000:3000"
+      - "3001:3000"
     depends_on:
       - backend
     volumes:
@@ -52,7 +50,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -68,7 +66,7 @@ services:
     image: redis:7-alpine
     container_name: naija_oracle_redis
     ports:
-      - "6379:6379"
+      - "6381:6379"
     volumes:
       - redis_data:/data
     restart: unless-stopped
@@ -89,7 +87,7 @@ services:
                --backend-store-uri postgresql://postgres:${POSTGRES_PASSWORD}@database:5432/naija_oracle
                --default-artifact-root /app/mlflow/artifacts"
     ports:
-      - "5000:5000"
+      - "5002:5000"
     depends_on:
       - database
     volumes:
@@ -106,7 +104,7 @@ services:
                uv pip install --system jupyterlab torch transformers scikit-learn pandas matplotlib seaborn &&
                jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token=''"
     ports:
-      - "8888:8888"
+      - "8889:8888"
     volumes:
       - ./ml_training:/app
       - jupyter_data:/root/.jupyter

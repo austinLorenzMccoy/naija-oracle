@@ -1,38 +1,63 @@
-# Use Node.js 20 Alpine image
-FROM node:20-alpine
+# ── Stage 1: deps ───────────────────────────────────────────────────────────
+# Install ALL dependencies (including devDeps) so Tailwind v4 / LightningCSS
+# native binaries are present during the build step.
+FROM node:20-alpine AS deps
 
-# Set working directory
+# libc6-compat is needed on Alpine (musl) for some native Node modules
+RUN apk add --no-cache libc6-compat
+
 WORKDIR /app
 
-# Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# DO NOT use --only=production here — LightningCSS is a devDependency
+# and its musl-compatible native binary must be installed before `next build`
+RUN npm ci
 
-# Copy source code
+# ── Stage 2: builder ─────────────────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+# Copy installed node_modules (with devDeps + correct musl binaries) from deps stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S nextjs -u 1001
+# Disable Next.js telemetry during build
+ENV NEXT_TELEMETRY_DISABLED=1
 
-# Set correct permissions
-RUN chown -R nextjs:nodejs /app
-USER nextjs
-
-# Expose port
-EXPOSE 3000
-
-# Set environment variables
-ENV NODE_ENV=production
-
-# Build the application
 RUN npm run build
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000 || exit 1
+# ── Stage 3: runner (production image) ───────────────────────────────────────
+FROM node:20-alpine AS runner
 
-# Start the application
-CMD ["npm", "start"]
+RUN apk add --no-cache libc6-compat
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN addgroup -g 1001 -S nodejs
+RUN adduser  -S nextjs -u 1001
+
+# Copy only what's needed to serve the exported static output
+# (output: 'export' → files land in /app/out)
+COPY --from=builder --chown=nextjs:nodejs /app/out    ./out
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# If you switch away from `output: 'export'` back to a Node server,
+# replace the block above with:
+#   COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+#   COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+#   COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+
+EXPOSE 3000
+
+# Serve the static export with a lightweight HTTP server.
+# `serve` is included in node:20-alpine via npx — no extra install needed.
+CMD ["npx", "serve", "out", "-l", "3000"]

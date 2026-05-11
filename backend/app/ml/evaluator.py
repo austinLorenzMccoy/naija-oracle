@@ -9,7 +9,7 @@ from rouge_score import rouge_scorer
 from sklearn.metrics import mean_squared_error
 import json
 
-from app.config import settings
+from app.config import *
 
 class NaijaOracleEvaluator:
     """Comprehensive evaluation for Naija Oracle agents"""

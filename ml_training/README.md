@@ -5,12 +5,42 @@ Machine learning pipeline for training and evaluating cultural AI models for Nig
 ## Training Pipeline Overview
 
 ### **Task A - Persona Simulator Training**
-Fine-tunes LLaMA-3.1-8B to generate authentic Nigerian reviews with cultural voice patterns.
+Fine-tunes PyTorch neural networks to generate authentic Nigerian reviews with cultural voice patterns.
 
 ### **Task B - Recommendation Engine Training**
 Trains neural ranking models with contextual features for hyper-personalised recommendations.
 
-## Setup with UV
+### **Task C - Recommendation Ranker Training**
+Advanced ranking model with cultural alignment features for Nigerian market recommendations.
+
+## Directory Structure
+```
+ml_training/
+├── train_persona_simulator.py     # Persona simulator training
+├── train_recommendation_engine.py  # Recommendation engine training  
+├── train_recommendation_ranker.py  # Advanced ranker training
+├── process_training_data.py       # Data preprocessing
+├── dvc.yaml                       # DVC pipeline configuration
+├── plots/                         # Training visualizations
+│   └── ml_training_plots/         # Generated plots
+├── scripts/                       # Utility scripts
+└── requirements.txt               # ML dependencies
+```
+
+## Setup Options
+
+### Option 1: Docker (Recommended)
+```bash
+# Run ML training in Docker container
+cd /Users/a/Documents/naija_oracle
+docker-compose exec mlflow bash
+
+# Inside container, run training
+cd /app/ml_training
+python train_persona_simulator.py
+```
+
+### Option 2: Local Setup with UV
 
 ### Prerequisites
 - Python 3.11+

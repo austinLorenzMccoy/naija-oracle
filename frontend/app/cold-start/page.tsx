@@ -79,7 +79,7 @@ export default function ColdStartDemo() {
   const fetchRecommendations = async (ans: ColdStartAnswer) => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/v1/recommend', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8003/api/v1'}/recommend`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

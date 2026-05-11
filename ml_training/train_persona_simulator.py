@@ -338,15 +338,16 @@ def save_model(model, model_path: Path):
         }, f, indent=2)
 
 def plot_training_curves(train_losses, val_losses, plot_path: Path):
-    """Plot training curves"""
+    """Plot and save model"""
     plt.figure(figsize=(10, 6))
     plt.plot(train_losses, label='Training Loss')
     plt.plot(val_losses, label='Validation Loss')
+    plt.title('Persona Simulator Training')
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
-    plt.title('Persona Simulator Training Curves')
-    plt.legend()
     plt.grid(True)
+    plot_path = Path(plot_path)
+    plot_path.parent.mkdir(parents=True, exist_ok=True)
     plt.savefig(plot_path)
     plt.close()
 

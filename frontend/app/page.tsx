@@ -18,7 +18,7 @@ export default function Home() {
   return (
     <main className="bg-oracle-void text-text-primary">
       {/* Hero Section */}
-      <section className="min-h-screen flex items-center justify-center relative overflow-hidden px-4 py-20">
+      <section className="hero min-h-screen flex items-center justify-center relative overflow-hidden px-4 py-20">
         {/* Subtle gradient glow */}
         <div className="absolute inset-0 bg-gradient-to-b from-oracle-amber-500/8 to-oracle-void pointer-events-none" />
         

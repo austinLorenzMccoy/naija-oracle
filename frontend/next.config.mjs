@@ -14,14 +14,19 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
-  turbopack: {},
-  webpack: (config) => {
-    config.resolve.alias = {
-      ...config.resolve.alias,
+
+  // ── Turbopack (Next.js 16 default bundler) ──────────────────────────
+  // Move the @ alias here — webpack config is ignored when Turbopack is active
+  turbopack: {
+    resolveAlias: {
       '@': path.resolve(__dirname, '.'),
-    }
-    return config
+    },
   },
+
+  // ── Remove the webpack block entirely ───────────────────────────────
+  // Next.js 16 with Turbopack enabled will throw:
+  //   "This build is using Turbopack, with a webpack config and no turbopack config"
+  // The alias above handles what webpack was doing.
 }
 
 export default nextConfig

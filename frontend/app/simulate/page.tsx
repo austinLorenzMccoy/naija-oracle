@@ -56,7 +56,7 @@ export default function Simulate() {
     setIsGenerating(true)
     try {
       // Call backend API only (secure approach)
-      const response = await fetch('http://localhost:8000/api/v1/simulate-review', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8003/api/v1'}/simulate-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
