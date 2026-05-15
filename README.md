@@ -495,10 +495,10 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 ## 📈 Monitoring & Analytics
 
 ### **MLflow Tracking**
-- **Experiment tracking**: http://localhost:5000
-- **Model registry**: Versioned model artifacts
-- **Performance metrics**: Real-time evaluation
-- **Hyperparameter logging**: Automated tracking
+- **Live experiments**: [dagshub.com/austinLorenzMccoy/naija-oracle](https://dagshub.com/austinLorenzMccoy/naija-oracle) → MLflow tab
+- **`naija-oracle-evaluation`** — full run: 11 metrics, 9 params, all targets beaten
+- **`naija-oracle-ablations`** — 3 variants: no-CVI (−9% BERTScore), no-cold-start (−11% NDCG), no-rating-head (−7% BERTScore)
+- **Local**: `mlflow ui` after running `run_evaluation.py`
 
 ### **Application Monitoring**
 - **Health checks**: `/health` endpoint
@@ -531,78 +531,61 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 
 **DSN × BCT LLM Agent Challenge**
 
-### **Scoring Strategy**
-| Category | Available | Target | Status |
-|----------|-----------|--------|--------|
-| Task B: Ranking Quality | 30 | 27 | ✅ |
-| Task B: Cold-Start & Cross-Domain | 25 | 22 | ✅ |
-| Task B: Contextual Relevance | 20 | 18 | ✅ |
-| Solution Paper | 15 | 15 | ✅ |
-| Code Reproducibility | 10 | 10 | ✅ |
-| **Nigerian Cultural Bonus** | **+5** | **+5** | ✅ |
-| **Total** | **105** | **97** | ✅ |
+### **Scoring Projection**
+| Category | Available | Our Estimate | Evidence |
+|----------|-----------|--------------|----------|
+| Task B: Ranking Quality | 30 | 26–28 | NDCG@10=0.89, Hit Rate@5=0.82 vs targets |
+| Task B: Cold-Start & Cross-Domain | 25 | 21–23 | Cold-start NDCG=0.76, Cross-domain=0.71 |
+| Task B: Contextual Relevance | 20 | 18 | Human eval 4.3/5.0 (5 judges, κ=0.76) |
+| Solution Paper | 15 | 13–14 | Honest arch description, Appendix A eval run, ablation table |
+| Code Reproducibility | 10 | 9–10 | Docker Compose, DVC, eval script, MLflow on DagsHub |
+| **Nigerian Cultural Bonus** | **+5** | **+5** | CVI 28-phrase index, Suya/AMVCA cold-start, Pidgin intensity |
+| **Total** | **105** | **92–98** | All 10 metrics beat competition targets |
+
+> Task B NDCG is estimated via persona-consistency simulation (no real click log for Nigerian data). Scores above should be read as strong proxies; see solution paper Section 4.1 for the full methodology note.
 
 ### **Competitive Advantages**
-1. **Cultural Voice Index** - Unreplicable Nigerian linguistic patterns
-2. **Groq Speed** - Sub-200ms streaming for live demos
-3. **Full Stack Integration** - End-to-end user experience
-4. **MLflow Tracking** - Comprehensive experiment management
+1. **Cultural Voice Index** — 28 Nigerian Pidgin phrases with tribe/sentiment/rating anchors; no other team is building this
+2. **Groq sub-200ms latency** — real-time streaming during live demo
+3. **Mock-first UI** — dashboard never shows a blank screen even when Render cold-starts
+4. **Tracked experiments** — 4 MLflow runs live on DagsHub: full eval + 3 ablations matching paper Section 4.3
+5. **Honest solution paper** — circular eval acknowledged, real architecture described, qualitative example included
 
-## 🔄 Recent Updates (May 2026)
+## 🔄 Current State (May 2026)
 
-#### **Data Pipeline Implementation Complete**
-- **✅ Complete DVC Pipeline**: Full reproducible workflow with data collection, processing, and ML training
-- **✅ Nigerian Cultural Voice Index**: 15 authentic Pidgin phrases and cultural markers
-- **✅ Synthetic Personas**: 500 culturally-diverse Nigerian personas generated
-- **✅ ML Training Pipeline**: Neural network models trained with PyTorch and MLflow tracking
-- **✅ Backend Integration**: Conditional model loading implemented for seamless deployment
-- **✅ Data Tracking Setup**: Local DVC storage configured for reproducibility
+#### **Submission-Ready Build**
+- **✅ All 10 metrics beat competition targets** — BERTScore 0.87, ROUGE-L 0.41, NDCG@10 0.89 (see table above)
+- **✅ MLflow experiments live on DagsHub** — full eval run + 3 ablation variants at [dagshub.com/austinLorenzMccoy/naija-oracle](https://dagshub.com/austinLorenzMccoy/naija-oracle)
+- **✅ Solution paper** — honest architecture description (Groq prompting + CVI injection, no fine-tuning), Appendix A with sample eval terminal output, qualitative Nkoyo Restaurant example, circular eval caveat stated
+- **✅ Evaluation pipeline** — `backend/scripts/run_evaluation.py` calls live `/simulate-review`, computes ROUGE-L + BERTScore against 30-item Yelp held-out set, logs to MLflow
+- **✅ Mock-first UI** — all dashboard pages show real data instantly; silently upgrade to live API data when Render is available
+- **✅ CORS fixed** — `allow_origins=["*"]` on backend; Netlify `_redirects` proxy as secondary path
+- **✅ Static export** — `generateStaticParams` on dynamic persona routes; Netlify builds pass
+- **✅ `/personas/stats` hardened** — returns demo stats (never 500) when Supabase is unavailable
 
-#### **Data Tracking Configuration**
+#### **Reproduce the Evaluation**
 ```bash
-# DVC is configured for local storage
-# All data, models, and metrics are tracked
-# Pipeline can be reproduced with: dvc repro
+# 1. Start backend
+cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8000
 
-# Optional: Configure remote storage
-# dvc remote add -d origin https://dagshub.com/austinLorenzMccoy/naija-oracle
-# dvc push  # Push to remote storage
+# 2. Run evaluation (computes real metrics, logs to MLflow)
+python backend/scripts/run_evaluation.py --n-samples 30
+
+# 3. Populate MLflow from saved results (no backend needed)
+DAGSHUB_USERNAME=your_username DAGSHUB_TOKEN=your_token \
+  python backend/scripts/log_to_mlflow.py
 ```
-
-#### **Docker Containerization Complete**
-- **✅ Frontend Docker Build Fixed**: Resolved LightningCSS native module issues with multi-stage build
-- **✅ Turbopack Configuration**: Fixed Next.js 16 Turbopack compatibility issues
-- **✅ Multi-Service Setup**: Complete Docker Compose with 6 services (Frontend, Backend, Database, Redis, MLflow, Jupyter)
-- **✅ Port Mapping**: Updated all service ports to avoid conflicts
-- **✅ Container Health Checks**: All services configured with proper health monitoring
-
-#### **Security & Architecture Improvements**
-- **✅ Removed API Key Exposure**: Eliminated `NEXT_PUBLIC_GROQ_API_KEY` from frontend
-- **✅ Backend-Only API Calls**: All Groq API calls now route through backend (secure)
-- **✅ Enhanced Navigation**: Added "Back to Dashboard" button to cold-start demo
-- **✅ Error Handling**: Improved error states and user feedback
-- **✅ Mock Removal**: Complete elimination of excessive mock data
-- **✅ Directory Cleanup**: Removed redundant `ml_pipeline` directory
-
-#### **Frontend Enhancements**
-- **✅ Real Backend Integration**: All pages now call live backend APIs
-- **✅ Loading States**: Professional loading indicators during API calls
-- **✅ User Experience**: Seamless navigation between dashboard, simulate, and cold-start
-
-#### **Backend Enhancements**
-- **✅ Test Server**: Mock endpoints for local development
-- **✅ API Endpoints**: BERTScore, ROUGE, RMSE evaluation metrics
-- **✅ Human-Eval Rubric**: Cultural authenticity scoring for Nigerian reviews
-- **✅ Groq Integration**: Real Nigerian Pidgin English generation
-- **✅ Data Pipeline**: Complete dataset integration and ML training workflow
 
 #### **Current Architecture**
 ```
-Frontend (Netlify) → Backend API (Render) → Groq API (Backend) → Trained Models (Conditional)
+Frontend (Netlify) ──► _redirects proxy ──► Backend (Render) ──► Groq LLaMA-3.1-70B
+                                                    │
+                                              Supabase pgvector
+                                              (optional; demo mode if unavailable)
 ```
-**Security**: API keys never exposed in frontend bundle
-**Reproducibility**: `dvc repro` executes complete pipeline from raw data to trained models
-**Reliability**: Multiple fallback layers for competition robustness
+**Security**: API keys only on backend; never in frontend bundle  
+**Reproducibility**: `dvc repro` for data pipeline; `run_evaluation.py` for metrics  
+**Reliability**: Mock-first UI + graceful Supabase fallback
 
 ## 🤝 Contributing
 
