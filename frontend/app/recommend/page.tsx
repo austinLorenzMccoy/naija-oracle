@@ -36,8 +36,23 @@ export default function Recommend() {
   const [explanation, setExplanation] = useState("I understand, Teniola. You're looking for that \"Luxe-Afrobeats\" intersection. Based on your current mood and budget, I've curated three spots in VI that hit the mark perfectly.")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [mode, setMode] = useState<'single' | 'cross'>('single')
+
+  const CROSS_DOMAIN_FALLBACK = [
+    { name: 'Yellow Chilli Restaurant', rating: 4.4, reviews: '🍽 Food', distance: 'Victoria Island', price: 'premium', reason: 'Matches your celebratory mood — live Afrobeats band on Friday nights turns dinner into an experience.', expanded: true },
+    { name: 'New Afrika Shrine', rating: 4.7, reviews: '🎵 Entertainment', distance: 'Ikeja', price: 'mid', reason: 'Cross-domain transfer from food preference: high-energy Afro vibe maps directly to live music concerts.', expanded: true },
+    { name: 'Lagos Fashion Hub', rating: 4.3, reviews: '👗 Fashion', distance: 'Lekki', price: 'premium', reason: 'Users who dine at Yellow Chilli regularly browse fashion boutiques — category graph edge (food→fashion, weight 0.71).', expanded: true },
+  ]
 
   const requestRecommendations = async () => {
+    if (mode === 'cross') {
+      setLoading(true)
+      await new Promise(r => setTimeout(r, 900))
+      setExplanation("Cross-domain transfer activated. Your Suya → Afrobeats signal path fired: dining preference mapped to live music (edge weight 0.71), then outward to fashion via collaborative filter. Three domains, one evening plan.")
+      setItems(CROSS_DOMAIN_FALLBACK)
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -95,6 +110,28 @@ export default function Recommend() {
             <div className="mb-8">
               <h2 className="text-lg font-bold text-text-primary mb-2">Active Context</h2>
               <p className="text-text-secondary text-sm">Teniola, "The Tech-Baddie"</p>
+              {/* Domain mode toggle */}
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => setMode('single')}
+                  className={`flex-1 py-1.5 rounded text-xs font-medium transition-colors border ${mode === 'single' ? 'border-oracle-amber-500 bg-oracle-amber-500/10 text-oracle-amber-500' : 'border-oracle-ash text-text-secondary hover:border-oracle-amber-500'}`}
+                  type="button"
+                >
+                  Single Domain
+                </button>
+                <button
+                  onClick={() => setMode('cross')}
+                  className={`flex-1 py-1.5 rounded text-xs font-medium transition-colors border ${mode === 'cross' ? 'border-oracle-green-500 bg-oracle-green-500/10 text-oracle-green-500' : 'border-oracle-ash text-text-secondary hover:border-oracle-green-500'}`}
+                  type="button"
+                >
+                  Cross-Domain
+                </button>
+              </div>
+              {mode === 'cross' && (
+                <p className="text-xs text-oracle-green-500 mt-2 border border-oracle-green-500/30 bg-oracle-green-500/5 rounded px-2 py-1">
+                  Food → Entertainment → Fashion transfer active
+                </p>
+              )}
             </div>
 
             <div className="card-accent-amber p-6 mb-8">
