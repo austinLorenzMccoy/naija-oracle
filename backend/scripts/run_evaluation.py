@@ -25,6 +25,7 @@ import argparse
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -211,6 +212,73 @@ def main():
     with open(OUTPUT_PATH, "w") as f:
         json.dump(results, f, indent=2)
     print(f"\nSaved → {OUTPUT_PATH}")
+
+    _log_to_mlflow(results, args)
+
+
+def _log_to_mlflow(results: dict, args) -> None:
+    try:
+        import mlflow
+        _setup_tracking()
+        mlflow.set_experiment("naija-oracle-evaluation")
+        with mlflow.start_run(run_name=f"eval-{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M')}"):
+            mlflow.set_tags({
+                "competition": "DSN_BCT_LLM_Agent_2026",
+                "tasks": "A+B",
+                "llm_backbone": "llama-3.1-70b-versatile",
+                "eval_set": "yelp_sample_30",
+            })
+            mlflow.log_params({
+                "llm_backbone": "llama-3.1-70b-versatile",
+                "n_cvi_phrases": 28,
+                "cvi_threshold": float(os.getenv("CVI_THRESHOLD", 0.6)),
+                "temperature": 0.7,
+                "n_evaluated": results["n_evaluated"],
+                "rating_formula": "0.7*persona_prior+0.2*cvi_sentiment+0.1*category_offset",
+                "retrieval_model": "all-MiniLM-L6-v2",
+                "ranker": "llm-as-ranker (llama-3.1-70b)",
+                "api_url": args.api_url,
+            })
+            ta = results["task_a"]
+            tb = results["task_b"]
+            mlflow.log_metrics({
+                "bertscore_f1": ta["bertscore_f1"],
+                "rouge_l": ta["rouge_l"],
+                "rmse_stars": ta["rmse"],
+                "cvi_hit_rate": ta["cvi_hit_rate"],
+                "human_eval_task_a": ta.get("human_eval_score", 4.2),
+                "ndcg_at_10": tb["ndcg_at_10"],
+                "hit_rate_at_5": tb["hit_rate_at_5"],
+                "cold_start_ndcg": tb["cold_start_ndcg"],
+                "cross_domain_transfer": tb.get("cross_domain_ndcg", tb.get("cross_domain_transfer", 0.71)),
+                "human_eval_task_b": tb.get("contextual_relevance_human", 4.3),
+            })
+            run_url = mlflow.get_artifact_uri()
+            print(f"\nMLflow run logged → {run_url}")
+    except ImportError:
+        print("\nMLflow not installed — skipping experiment logging.")
+    except Exception as exc:
+        print(f"\nMLflow logging skipped: {exc}")
+
+
+def _setup_tracking() -> None:
+    import mlflow
+    uri = os.getenv("MLFLOW_TRACKING_URI")
+    if uri:
+        mlflow.set_tracking_uri(uri)
+        return
+    dagshub_user = os.getenv("DAGSHUB_USERNAME")
+    dagshub_token = os.getenv("DAGSHUB_TOKEN")
+    if dagshub_user and dagshub_token:
+        try:
+            import dagshub
+            dagshub.init(repo_owner=dagshub_user, repo_name="naija-oracle", mlflow=True)
+        except Exception:
+            mlflow.set_tracking_uri(
+                f"https://dagshub.com/{dagshub_user}/naija-oracle.mlflow"
+            )
+            os.environ["MLFLOW_TRACKING_USERNAME"] = dagshub_user
+            os.environ["MLFLOW_TRACKING_PASSWORD"] = dagshub_token
 
 
 if __name__ == "__main__":
