@@ -350,6 +350,7 @@ __pycache__/
 # Monitoring and metrics
 monitoring/
 metrics/
+!metrics/evaluation_results.json
 .grafana/
 .prometheus/
 .env.render# DVC lock files

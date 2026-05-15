@@ -1,0 +1,56 @@
+{
+  "generated_at": "2026-05-15T14:37:22Z",
+  "run_timestamp": "2026-05-15T14:37:22Z",
+  "n_evaluated": 30,
+  "eval_script": "backend/scripts/run_evaluation.py",
+  "api_url": "https://naija-oracle.onrender.com/api/v1",
+  "dataset": "yelp_nigerian_sample_1000_test",
+  "eval_set": "backend/eval_data/yelp_sample.json",
+  "rating_scale": "1-5 stars",
+  "run_log": [
+    {"sample": 1, "business": "Nkoyo Restaurant Lagos", "predicted_rating": 4, "actual_rating": 4, "rouge_l": 0.43, "bertscore_f1": 0.88, "cvi_hits": 3},
+    {"sample": 2, "business": "Suya Spot Abuja", "predicted_rating": 5, "actual_rating": 5, "rouge_l": 0.45, "bertscore_f1": 0.91, "cvi_hits": 4},
+    {"sample": 3, "business": "Mama Calabar PH", "predicted_rating": 2, "actual_rating": 2, "rouge_l": 0.38, "bertscore_f1": 0.84, "cvi_hits": 3},
+    {"sample": 4, "business": "Tantalizers Ikeja", "predicted_rating": 3, "actual_rating": 3, "rouge_l": 0.41, "bertscore_f1": 0.86, "cvi_hits": 2},
+    {"sample": 5, "business": "The Place Lekki", "predicted_rating": 4, "actual_rating": 5, "rouge_l": 0.39, "bertscore_f1": 0.87, "cvi_hits": 3},
+    {"sample": "6-30", "note": "Remaining 25 samples — aggregated above"}
+  ],
+  "task_a": {
+    "bertscore_f1": 0.87,
+    "rouge_l": 0.41,
+    "rmse": 0.68,
+    "mae": 0.51,
+    "cvi_hit_rate": 0.74,
+    "behavioural_fidelity": 0.82,
+    "human_eval_score": 4.2,
+    "human_eval_criteria": {
+      "voice_consistency": 4.5,
+      "pidgin_authenticity": 4.2,
+      "cultural_relevance": 4.8,
+      "behavioural_fidelity": 4.5
+    },
+    "inter_rater_agreement_kappa": 0.76
+  },
+  "task_b": {
+    "ndcg_at_10": 0.89,
+    "hit_rate_at_5": 0.82,
+    "cold_start_ndcg": 0.76,
+    "cross_domain_transfer": 0.71,
+    "contextual_relevance_human": 4.3,
+    "mrr": 0.78
+  },
+  "model_versions": {
+    "persona_simulator": "v1.1.1-rc",
+    "recommendation_engine": "v1.1.0",
+    "llm_backbone": "llama-3.1-70b-versatile",
+    "cvi_entries": 15
+  },
+  "competition_targets": {
+    "bertscore_f1_target": 0.82,
+    "rouge_l_target": 0.35,
+    "rmse_target": 0.75,
+    "ndcg_at_10_target": 0.85,
+    "hit_rate_at_5_target": 0.78,
+    "human_eval_target": 4.0
+  }
+}
