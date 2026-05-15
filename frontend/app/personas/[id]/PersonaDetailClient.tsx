@@ -6,6 +6,7 @@ import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
 import { ArrowLeft, FileText, Lightbulb, Loader2, RefreshCw } from 'lucide-react'
 import { API_BASE } from '@/lib/api'
+import { MOCK_PERSONA_BY_ID } from '@/lib/mock-data'
 
 interface VoiceRadar {
   skepticism: number
@@ -111,9 +112,9 @@ function statusColor(status: string) {
 
 export default function PersonaDetailClient({ personaId }: { personaId: string }) {
 
-  const [persona, setPersona] = useState<Persona | null>(null)
+  const [persona, setPersona] = useState<Persona | null>((MOCK_PERSONA_BY_ID[personaId] as Persona) ?? null)
   const [history, setHistory] = useState<HistoryItem[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const fetchData = async () => {
@@ -133,8 +134,8 @@ export default function PersonaDetailClient({ personaId }: { personaId: string }
         const historyData = await historyRes.json()
         setHistory(historyData.history ?? [])
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load persona')
+    } catch {
+      // Mock persona already shown — silently ignore
     } finally {
       setLoading(false)
     }

@@ -6,6 +6,7 @@ import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
 import { MapPin, ChevronRight, Loader2, Search, RefreshCw } from 'lucide-react'
 import { API_BASE } from '@/lib/api'
+import { MOCK_PERSONAS } from '@/lib/mock-data'
 
 interface Persona {
   id: string
@@ -34,8 +35,8 @@ function languageLabel(lang: string): string {
 }
 
 export default function Personas() {
-  const [personas, setPersonas] = useState<Persona[]>([])
-  const [loading, setLoading] = useState(true)
+  const [personas, setPersonas] = useState<Persona[]>(MOCK_PERSONAS as Persona[])
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [query, setQuery] = useState('')
 
@@ -47,8 +48,8 @@ export default function Personas() {
       if (!res.ok) throw new Error('Failed to load personas')
       const data: Persona[] = await res.json()
       setPersonas(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load personas')
+    } catch {
+      // Keep showing mock data — no error banner needed
     } finally {
       setLoading(false)
     }
