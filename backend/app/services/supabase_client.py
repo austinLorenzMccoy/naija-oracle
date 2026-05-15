@@ -4,6 +4,7 @@ Supabase client for database operations and real-time features
 
 import os
 from typing import Dict, List, Optional, Any
+from uuid import UUID
 from supabase import create_client, Client
 from postgrest import APIResponse
 
@@ -11,6 +12,71 @@ from app.config import settings
 from app.models.persona import Persona, PersonaCreate, PersonaUpdate
 from app.models.review import ReviewGeneration
 from app.models.recommendation import RecommendationGeneration
+
+DEMO_PERSONAS = [
+    Persona(
+        id="1",
+        user_id="demo-user",
+        name="Emeka O.",
+        age_range="25-34",
+        city="Lagos",
+        lga="Eti-Osa",
+        primary_language="igbo",
+        review_style="expressive",
+        avg_rating=4.2,
+        sentiment_volatility="medium",
+        categories_reviewed=["tech_gadget", "fintech", "restaurant"],
+        sample_reviews=[
+            "The speed dey sharp sharp, but price high like NEPA restoring light.",
+            "Everything set finish, clean design."
+        ],
+        cultural_markers=["sharp sharp", "NEPA", "fall hand"],
+        pidgin_intensity=0.82,
+        voice_radar={"skepticism": 0.72, "aspiration": 0.88, "value": 0.76, "sass": 0.68, "loyalty": 0.64},
+        cultural_density=88,
+        status="active_oracle",
+    ),
+    Persona(
+        id="2",
+        user_id="demo-user",
+        name="Aisha H.",
+        age_range="25-34",
+        city="Kano",
+        lga="Tarauni",
+        primary_language="hausa",
+        review_style="analytical",
+        avg_rating=4.5,
+        sentiment_volatility="low",
+        categories_reviewed=["fashion", "beauty", "food"],
+        sample_reviews=["Quality dey, but delivery timing needs discipline."],
+        cultural_markers=["quality dey", "timing"],
+        pidgin_intensity=0.55,
+        voice_radar={"skepticism": 0.58, "aspiration": 0.74, "value": 0.82, "sass": 0.42, "loyalty": 0.79},
+        cultural_density=86,
+        status="active",
+    ),
+    Persona(
+        id="3",
+        user_id="demo-user",
+        name="Tunde B.",
+        age_range="18-24",
+        city="Lagos",
+        lga="Yaba",
+        primary_language="yoruba",
+        review_style="casual",
+        avg_rating=3.9,
+        sentiment_volatility="high",
+        categories_reviewed=["tech_gadget", "entertainment", "fintech"],
+        sample_reviews=["App clean, but the onboarding stress no make sense."],
+        cultural_markers=["no make sense", "clean"],
+        pidgin_intensity=0.75,
+        voice_radar={"skepticism": 0.8, "aspiration": 0.66, "value": 0.7, "sass": 0.73, "loyalty": 0.52},
+        cultural_density=75,
+        status="active",
+    ),
+]
+
+DEMO_PERSONA_BY_ID = {persona.id: persona for persona in DEMO_PERSONAS}
 
 class SupabaseClient:
     """Client for Supabase database and real-time operations"""
@@ -57,6 +123,14 @@ class SupabaseClient:
     async def get_persona(self, persona_id: str) -> Optional[Persona]:
         """Get persona by ID"""
         try:
+            if persona_id in DEMO_PERSONA_BY_ID:
+                return DEMO_PERSONA_BY_ID[persona_id]
+
+            try:
+                UUID(persona_id)
+            except ValueError:
+                return None
+
             response = self.client.table("personas").select("*").eq("id", persona_id).execute()
             
             if response.data:
@@ -70,10 +144,16 @@ class SupabaseClient:
         """Get all personas for a user"""
         try:
             response = self.client.table("personas").select("*").eq("user_id", user_id).execute()
-            
-            return [Persona(**item) for item in response.data] if response.data else []
+
+            personas = [Persona(**item) for item in response.data] if response.data else []
+            if user_id == "demo-user" and len(personas) < len(DEMO_PERSONAS):
+                existing_ids = {persona.id for persona in personas}
+                personas.extend(persona for persona in DEMO_PERSONAS if persona.id not in existing_ids)
+            return personas
             
         except Exception as e:
+            if user_id == "demo-user":
+                return DEMO_PERSONAS
             raise Exception(f"Database error getting user personas: {str(e)}")
     
     async def update_persona(self, persona_id: str, update_data: PersonaUpdate) -> Optional[Persona]:

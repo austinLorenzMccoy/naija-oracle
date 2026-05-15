@@ -222,7 +222,7 @@ class CulturalVoiceIndex:
             "fashion": ProductContext.FASHION,
             "fintech": ProductContext.TECH,
             "tech_gadget": ProductContext.TECH,
-            "entertainment": ProductContext.ENTERTAINMENT
+            "entertainment": ProductContext.GENERAL
         }
         
         product_context = category_mapping.get(product_category, ProductContext.GENERAL)

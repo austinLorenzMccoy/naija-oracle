@@ -51,6 +51,10 @@ The name is deliberate: an *oracle* knows what you'll say before you say it. "Na
 **DagsHub Repository**: https://dagshub.com/austinLorenzMccoy/naija-oracle \
 **Docker Compose**: Fully containerized multi-service setup
 
+## 🎬 Demo Video
+
+**[▶ Watch the 3-minute demo](#)** — live walkthrough of Task A (review simulation with Nigerian Pidgin output), Task B (contextual recommendations), cold-start onboarding, and the persona voice fingerprint system.
+
 ## 🎯 Problem Solved
 
 Existing LLM-based review and recommendation systems suffer from three compounding failures when applied to Nigerian users:

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 import { LayoutDashboard, Zap, MessageCircle, Users, Settings, Plus, HelpCircle, UserPlus } from 'lucide-react'
 
 const navItems = [
@@ -15,6 +16,7 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [helpOpen, setHelpOpen] = useState(false)
 
   return (
     <aside className="fixed left-0 top-0 h-full w-60 bg-oracle-charcoal border-r border-oracle-ash flex flex-col py-6 z-40">
@@ -47,15 +49,27 @@ export default function Sidebar() {
 
       {/* Bottom Actions */}
       <div className="px-3 mt-auto">
-        <button className="w-full btn-primary flex items-center justify-center gap-2 mb-6">
+        <Link href="/simulate" className="w-full btn-primary flex items-center justify-center gap-2 mb-6">
           <Plus className="w-4 h-4" />
           New Simulation
-        </button>
+        </Link>
         <div className="border-t border-oracle-ash pt-4">
-          <button className="flex items-center gap-3 text-text-tertiary hover:text-oracle-amber-300 transition-colors px-2 py-2 w-full">
+          <button
+            onClick={() => setHelpOpen((open) => !open)}
+            className="flex items-center gap-3 text-text-tertiary hover:text-oracle-amber-300 transition-colors px-2 py-2 w-full"
+            type="button"
+          >
             <HelpCircle className="w-5 h-5" />
             <span className="text-xs font-medium">Help Center</span>
           </button>
+          {helpOpen && (
+            <div className="mt-3 rounded-lg border border-oracle-ash bg-oracle-void p-3 text-xs text-text-secondary">
+              <p className="text-text-primary font-medium mb-2">Quick paths</p>
+              <Link href="/simulate" className="block py-1 hover:text-oracle-amber-300">Run a review simulation</Link>
+              <Link href="/recommend" className="block py-1 hover:text-oracle-amber-300">Generate recommendations</Link>
+              <Link href="/reports" className="block py-1 hover:text-oracle-amber-300">Export reports</Link>
+            </div>
+          )}
         </div>
       </div>
     </aside>

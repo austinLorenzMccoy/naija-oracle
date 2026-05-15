@@ -12,8 +12,15 @@ from dotenv import load_dotenv
 
 from app.routers import simulate, recommend, personas, auth, evaluation
 from app.database import init_db
-from app.ml.evaluator import NaijaOracleEvaluator
 from app.services.supabase_client import SupabaseClient
+
+# Try to import evaluator, but make it optional
+try:
+    from app.ml.evaluator import NaijaOracleEvaluator
+    evaluator_available = True
+except ImportError as e:
+    print(f"Warning: ML Evaluator not available: {e}")
+    evaluator_available = False
 
 # Load environment variables
 load_dotenv()
@@ -25,8 +32,19 @@ security = HTTPBearer()
 async def lifespan(app: FastAPI):
     """Initialize database and services on startup"""
     await init_db()
-    app.state.supabase = SupabaseClient()
-    app.state.evaluator = NaijaOracleEvaluator()
+    
+    # Try to initialize Supabase, but don't fail if credentials are missing
+    try:
+        app.state.supabase = SupabaseClient()
+    except ValueError as e:
+        print(f"Warning: Supabase not configured: {e}")
+        print("Running in demo mode without database persistence")
+        app.state.supabase = None
+    
+    # Only initialize evaluator if ML dependencies are available
+    if evaluator_available:
+        app.state.evaluator = NaijaOracleEvaluator()
+    
     yield
     # Cleanup if needed
 
@@ -66,10 +84,13 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
+    from datetime import datetime
     return {
         "status": "healthy",
         "service": "Naija Oracle Backend",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "timestamp": datetime.utcnow().isoformat(),
+        "ml_available": evaluator_available
     }
 
 if __name__ == "__main__":

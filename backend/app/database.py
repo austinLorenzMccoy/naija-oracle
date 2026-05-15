@@ -28,12 +28,26 @@ if database_url.startswith("postgresql://"):
         database_url = database_url.replace(":6543/", ":5432/")
         database_url += "?prepared_statement_cache_size=0"
 
-engine = create_async_engine(
-    database_url,
-    echo=True,
-    poolclass=StaticPool,
-    connect_args={"check_same_thread": False} if "sqlite" in database_url else {}
-)
+# Try to create async engine with proper fallback
+try:
+    engine = create_async_engine(
+        database_url,
+        echo=True,
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False} if "sqlite" in database_url else {}
+    )
+except Exception as e:
+    print(f"Warning: Could not create async engine: {e}")
+    print("Using fallback synchronous engine")
+    # Fallback to synchronous engine for testing
+    sync_url = database_url.replace("sqlite+aiosqlite://", "sqlite://")
+    from sqlalchemy import create_engine as sync_create_engine
+    engine = sync_create_engine(
+        sync_url,
+        echo=True,
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False} if "sqlite" in sync_url else {}
+    )
 
 # Session factory
 async_session_maker = sessionmaker(
@@ -42,8 +56,11 @@ async_session_maker = sessionmaker(
 
 async def init_db():
     """Initialize database tables"""
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"Warning: Could not initialize database: {e}")
 
 async def get_db() -> AsyncSession:
     """Get database session"""

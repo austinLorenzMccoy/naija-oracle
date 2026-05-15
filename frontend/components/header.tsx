@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Bell, Settings, Search } from 'lucide-react'
 import { useState, useRef, useEffect } from 'react'
 
@@ -10,9 +11,12 @@ interface HeaderProps {
 }
 
 export default function Header({ title, tabs }: HeaderProps) {
+  const router = useRouter()
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [notice, setNotice] = useState<string | null>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
   const settingsRef = useRef<HTMLDivElement>(null)
   const profileRef = useRef<HTMLDivElement>(null)
@@ -33,6 +37,26 @@ export default function Header({ title, tabs }: HeaderProps) {
     setProfileOpen(!profileOpen)
     setNotificationOpen(false)
     setSettingsOpen(false)
+  }
+
+  const showNotice = (message: string) => {
+    setNotice(message)
+    window.setTimeout(() => setNotice(null), 2400)
+  }
+
+  const exportWorkspaceData = () => {
+    const data = {
+      exported_at: new Date().toISOString(),
+      workspace: 'Naija Oracle',
+      pages: ['dashboard', 'simulate', 'recommend', 'personas', 'reports', 'settings']
+    }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'naija-oracle-workspace.json'
+    link.click()
+    URL.revokeObjectURL(url)
+    showNotice('Workspace export downloaded')
   }
 
   useEffect(() => {
@@ -77,14 +101,32 @@ export default function Header({ title, tabs }: HeaderProps) {
 
         {/* Right side actions */}
         <div className="flex items-center gap-4">
-          <div className="hidden md:flex items-center bg-oracle-charcoal border border-oracle-ash px-3 py-1.5 rounded-lg">
+          {notice && (
+            <div className="hidden lg:block text-xs text-oracle-green-500 border border-oracle-green-500/40 rounded px-3 py-1">
+              {notice}
+            </div>
+          )}
+
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              if (!searchQuery.trim()) {
+                showNotice('Type something to search')
+                return
+              }
+              router.push(`/personas?search=${encodeURIComponent(searchQuery.trim())}`)
+            }}
+            className="hidden md:flex items-center bg-oracle-charcoal border border-oracle-ash px-3 py-1.5 rounded-lg"
+          >
             <Search className="w-4 h-4 text-text-tertiary" />
             <input
               type="text"
               placeholder="Search insights..."
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
               className="bg-transparent border-none outline-none ml-2 text-text-primary placeholder-text-tertiary text-sm w-48"
             />
-          </div>
+          </form>
           
           {/* Notifications Button */}
           <div className="relative" ref={notificationRef}>
@@ -110,7 +152,16 @@ export default function Header({ title, tabs }: HeaderProps) {
                     <p className="text-xs text-text-secondary mt-1">Ifeanyi added 5-star review from Lagos</p>
                   </div>
                 </div>
-                <button className="w-full mt-3 text-xs text-oracle-amber-500 hover:text-oracle-amber-300">View all notifications</button>
+                <button
+                  onClick={() => {
+                    setNotificationOpen(false)
+                    router.push('/reports')
+                  }}
+                  className="w-full mt-3 text-xs text-oracle-amber-500 hover:text-oracle-amber-300"
+                  type="button"
+                >
+                  View all notifications
+                </button>
               </div>
             )}
           </div>
@@ -135,13 +186,28 @@ export default function Header({ title, tabs }: HeaderProps) {
                   >
                     Account Settings
                   </Link>
-                  <button className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors">
+                  <button
+                    onClick={() => showNotice('Notification preferences opened in Settings')}
+                    className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors"
+                    type="button"
+                  >
                     Notifications Preferences
                   </button>
-                  <button className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors">
+                  <button
+                    onClick={() => {
+                      setSettingsOpen(false)
+                      router.push('/settings#api-keys')
+                    }}
+                    className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors"
+                    type="button"
+                  >
                     API Keys
                   </button>
-                  <button className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors">
+                  <button
+                    onClick={exportWorkspaceData}
+                    className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors"
+                    type="button"
+                  >
                     Export Data
                   </button>
                 </div>
@@ -168,16 +234,32 @@ export default function Header({ title, tabs }: HeaderProps) {
                 <h3 className="text-sm font-bold text-text-primary mb-3">Oracle Admin</h3>
                 <p className="text-xs text-text-secondary mb-4">admin@oracle.naija</p>
                 <div className="space-y-2 border-t border-oracle-ash pt-3">
-                  <button className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors">
+                  <button
+                    onClick={() => showNotice('Profile view opened')}
+                    className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors"
+                    type="button"
+                  >
                     My Profile
                   </button>
-                  <button className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors">
+                  <button
+                    onClick={() => router.push('/settings')}
+                    className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors"
+                    type="button"
+                  >
                     Team Settings
                   </button>
-                  <button className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors">
+                  <button
+                    onClick={() => showNotice('Billing is current')}
+                    className="w-full text-left px-3 py-2 text-xs text-text-secondary hover:bg-oracle-smoke rounded transition-colors"
+                    type="button"
+                  >
                     Billing
                   </button>
-                  <button className="w-full text-left px-3 py-2 text-xs text-oracle-terra-500 hover:bg-oracle-smoke rounded transition-colors">
+                  <button
+                    onClick={() => showNotice('Signed out of demo session')}
+                    className="w-full text-left px-3 py-2 text-xs text-oracle-terra-500 hover:bg-oracle-smoke rounded transition-colors"
+                    type="button"
+                  >
                     Sign Out
                   </button>
                 </div>

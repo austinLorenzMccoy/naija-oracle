@@ -1,39 +1,152 @@
+'use client'
+
+import { useEffect, useState, use } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
-import { ArrowLeft, FileText, Lightbulb } from 'lucide-react'
+import { ArrowLeft, FileText, Lightbulb, Loader2, RefreshCw } from 'lucide-react'
+import { API_BASE } from '@/lib/api'
 
-export async function generateStaticParams() {
-  // Generate static params for persona IDs
-  return [
-    { id: '1' },
-    { id: '2' },
-    { id: '3' },
-    { id: '4' },
-  ]
+interface VoiceRadar {
+  skepticism: number
+  aspiration: number
+  value: number
+  sass: number
+  loyalty: number
 }
 
-export default function PersonaDetail({ params }: { params: { id: string } }) {
-  const personaId = params.id
+interface Persona {
+  id: string
+  name: string
+  city: string
+  lga: string
+  primary_language: string
+  review_style: string
+  avg_rating: number
+  pidgin_intensity: number
+  cultural_density: number
+  status: string
+  age_range?: string
+  voice_radar?: VoiceRadar
+  cultural_markers?: string[]
+  sample_reviews?: string[]
+  categories_reviewed?: string[]
+}
 
-  const persona = {
-    id: 1,
-    name: 'Emeka O.',
-    title: 'Premium Tech Enthusiast',
-    location: 'Lagos, NG',
-    lga: 'Eti-Osa',
-    languages: 'English, Igbo, Pidgin',
-    status: 'ACTIVE_ORACLE',
-    reviews: [
-      { product: 'MTN Data Plan 5G', sentiment: 'MIXED', score: 0.72, excerpt: '"The speed dey sharp sharp, but price high like NEPA restoring light"' },
-      { product: 'Kuda Bank UI Update', sentiment: 'POSITIVE', score: 0.94, excerpt: '"Everything set finish, clean design"' },
-      { product: 'Glo Mega Data 100GB', sentiment: 'NEGATIVE', score: 0.45, excerpt: '"Connection dey fall hand for inside Eti-Osa, this one na fall hand"' },
-    ],
-    recommendations: [
-      { product: 'iPhone 15 Pro Max', fit: '98%', reason: 'Matched for Aspiration & Tech-savviness' },
-      { product: 'Terra Kulture Dining', fit: '84%', reason: 'Cultural alignment with Sunday Church lifestyle' },
-    ]
+interface HistoryItem {
+  id?: string
+  product_name?: string
+  product?: string
+  sentiment?: string
+  score?: number
+  bertscore?: number
+  review_text?: string
+  review_excerpt?: string
+  type?: 'review' | 'recommendation'
+  fit_score?: number
+  reasoning?: string
+  created_at?: string
+}
+
+// Radar chart: 5-axis polygon mapped from VoiceRadar values
+function RadarChart({ data }: { data: VoiceRadar }) {
+  const cx = 60
+  const cy = 70
+  const maxR = 40
+
+  const axes = [
+    { key: 'skepticism' as const, angle: -90, label: 'SKEPTICISM', lx: 60, ly: 22 },
+    { key: 'aspiration' as const, angle: -18, label: 'ASPIRATION', lx: 100, ly: 58 },
+    { key: 'value' as const, angle: 54, label: 'VALUE', lx: 80, ly: 115 },
+    { key: 'sass' as const, angle: 126, label: 'SASS', lx: 14, ly: 115 },
+    { key: 'loyalty' as const, angle: 198, label: 'LOYALTY', lx: 4, ly: 58 },
+  ]
+
+  const toXY = (angle: number, r: number) => ({
+    x: cx + r * Math.cos((angle * Math.PI) / 180),
+    y: cy + r * Math.sin((angle * Math.PI) / 180),
+  })
+
+  const points = axes
+    .map(({ key, angle }) => {
+      const r = (data[key] ?? 0.5) * maxR
+      const { x, y } = toXY(angle, r)
+      return `${x},${y}`
+    })
+    .join(' ')
+
+  return (
+    <svg viewBox="0 0 120 140" className="w-full mb-6">
+      {[10, 20, 30, 40].map((r) => (
+        <polygon
+          key={r}
+          points={axes.map(({ angle }) => {
+            const { x, y } = toXY(angle, r)
+            return `${x},${y}`
+          }).join(' ')}
+          fill="none"
+          stroke="#3D3B37"
+          strokeWidth="1"
+        />
+      ))}
+      {axes.map(({ angle, key }) => {
+        const outer = toXY(angle, maxR)
+        return <line key={key} x1={cx} y1={cy} x2={outer.x} y2={outer.y} stroke="#3D3B37" strokeWidth="1" />
+      })}
+      <polygon points={points} fill="#C94020" fillOpacity="0.3" stroke="#F28060" strokeWidth="2" />
+      {axes.map(({ label, lx, ly }) => (
+        <text key={label} x={lx} y={ly} textAnchor="middle" style={{ fontSize: '6px', fill: '#9A9590' }}>
+          {label}
+        </text>
+      ))}
+    </svg>
+  )
+}
+
+function statusColor(status: string) {
+  if (status.includes('active')) return 'text-oracle-green-500'
+  if (status.includes('inactive')) return 'text-oracle-terra-500'
+  return 'text-oracle-amber-500'
+}
+
+export default function PersonaDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id: personaId } = use(params)
+
+  const [persona, setPersona] = useState<Persona | null>(null)
+  const [history, setHistory] = useState<HistoryItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchData = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [personaRes, historyRes] = await Promise.all([
+        fetch(`${API_BASE}/personas/${personaId}`),
+        fetch(`${API_BASE}/personas/${personaId}/history?limit=10`),
+      ])
+
+      if (!personaRes.ok) throw new Error('Persona not found')
+      const personaData: Persona = await personaRes.json()
+      setPersona(personaData)
+
+      if (historyRes.ok) {
+        const historyData = await historyRes.json()
+        setHistory(historyData.history ?? [])
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load persona')
+    } finally {
+      setLoading(false)
+    }
   }
+
+  useEffect(() => {
+    fetchData()
+  }, [personaId])
+
+  const reviews = history.filter((h) => h.type === 'review' || h.review_text || h.bertscore)
+  const recs = history.filter((h) => h.type === 'recommendation' || h.fit_score !== undefined)
 
   return (
     <div className="flex">
@@ -42,157 +155,245 @@ export default function PersonaDetail({ params }: { params: { id: string } }) {
         <Header />
 
         <div className="flex-1 overflow-auto bg-oracle-void p-8">
-          <Link href="/personas" className="flex items-center gap-2 text-oracle-amber-500 hover:text-oracle-amber-300 mb-8 w-fit">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Personas
-          </Link>
+          <div className="flex items-center gap-3 mb-8">
+            <Link href="/personas" className="flex items-center gap-2 text-oracle-amber-500 hover:text-oracle-amber-300 w-fit">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Personas
+            </Link>
+            <button
+              onClick={fetchData}
+              title="Refresh"
+              className="ml-auto p-2 border border-oracle-ash text-text-secondary hover:border-oracle-amber-500 hover:text-oracle-amber-500 rounded-lg transition-colors"
+              type="button"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </button>
+          </div>
 
-          <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
-            {/* Left Column: Persona Info */}
-            <div className="lg:col-span-1">
-              <div className="card-accent-amber p-8 mb-8">
-                <div className="w-20 h-20 rounded-full bg-oracle-amber-500/20 flex items-center justify-center text-oracle-amber-500 font-bold text-2xl mx-auto mb-6">
-                  {persona.name.charAt(0)}
-                </div>
-                <h1 className="text-2xl font-bold text-center mb-1">{persona.name}</h1>
-                <p className="text-oracle-amber-500 text-center text-sm mb-6">{persona.title}</p>
-
-                <div className="space-y-4 pt-6 border-t border-oracle-ash">
-                  <div>
-                    <p className="text-text-tertiary text-xs uppercase">Location</p>
-                    <p className="text-text-primary font-medium">{persona.location}</p>
-                  </div>
-                  <div>
-                    <p className="text-text-tertiary text-xs uppercase">LGA</p>
-                    <p className="text-text-primary font-medium">{persona.lga}</p>
-                  </div>
-                  <div>
-                    <p className="text-text-tertiary text-xs uppercase">Languages</p>
-                    <p className="text-text-primary font-medium">{persona.languages}</p>
-                  </div>
-                  <div>
-                    <p className="text-text-tertiary text-xs uppercase">Status</p>
-                    <p className="text-oracle-green-500 font-medium text-sm">{persona.status}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Voice Fingerprint */}
-              <div className="card-accent p-8">
-                <h3 className="font-bold mb-6">Voice Fingerprint</h3>
-                <svg viewBox="0 0 120 140" className="w-full mb-6">
-                  {/* Circles */}
-                  <circle cx="60" cy="70" r="10" fill="none" stroke="#3D3B37" strokeWidth="1" />
-                  <circle cx="60" cy="70" r="20" fill="none" stroke="#3D3B37" strokeWidth="1" />
-                  <circle cx="60" cy="70" r="30" fill="none" stroke="#3D3B37" strokeWidth="1" />
-                  <circle cx="60" cy="70" r="40" fill="none" stroke="#3D3B37" strokeWidth="1" />
-
-                  {/* Axes */}
-                  <line x1="60" y1="30" x2="60" y2="110" stroke="#3D3B37" strokeWidth="1" />
-                  <line x1="20" y1="70" x2="100" y2="70" stroke="#3D3B37" strokeWidth="1" />
-                  <line x1="30" y1="42" x2="90" y2="98" stroke="#3D3B37" strokeWidth="1" />
-                  <line x1="90" y1="42" x2="30" y2="98" stroke="#3D3B37" strokeWidth="1" />
-
-                  {/* Filled shape */}
-                  <polygon points="60,35 78,55 85,78 68,95 52,95 35,78 42,55" fill="#C94020" fillOpacity="0.3" stroke="#F28060" strokeWidth="2" />
-
-                  {/* Labels */}
-                  <text x="60" y="25" textAnchor="middle" className="text-xs fill-text-secondary">SKEPTICISM</text>
-                  <text x="95" y="72" textAnchor="start" className="text-xs fill-text-secondary">ASPIRATION</text>
-                  <text x="60" y="115" textAnchor="middle" className="text-xs fill-text-secondary">VALUE</text>
-                  <text x="15" y="75" textAnchor="end" className="text-xs fill-text-secondary">SASS</text>
-                  <text x="60" y="50" textAnchor="middle" className="text-xs fill-text-secondary">LOYALTY</text>
-                </svg>
-
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-text-secondary">Cultural Density</span>
-                    <span className="text-oracle-amber-500 font-mono">88%</span>
-                  </div>
-                  <div className="w-full h-1 bg-oracle-ash rounded overflow-hidden">
-                    <div className="h-full bg-oracle-amber-500" style={{ width: '88%' }} />
-                  </div>
-                </div>
-              </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-24">
+              <Loader2 className="w-8 h-8 animate-spin text-oracle-amber-500 mr-3" />
+              <span className="text-text-secondary">Loading persona...</span>
             </div>
+          ) : error || !persona ? (
+            <div className="card-accent p-10 text-center max-w-md mx-auto">
+              <p className="text-oracle-terra-300 mb-4">{error ?? 'Persona not found'}</p>
+              <button onClick={fetchData} className="btn-primary text-sm px-5 py-2" type="button">
+                Retry
+              </button>
+            </div>
+          ) : (
+            <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
+              {/* Left: Persona Info */}
+              <div className="lg:col-span-1">
+                <div className="card-accent-amber p-8 mb-8">
+                  <div className="w-20 h-20 rounded-full bg-oracle-amber-500/20 flex items-center justify-center text-oracle-amber-500 font-bold text-2xl mx-auto mb-6">
+                    {persona.name.charAt(0)}
+                  </div>
+                  <h1 className="text-2xl font-bold text-center mb-1">{persona.name}</h1>
+                  <p className="text-oracle-amber-500 text-center text-sm mb-6 capitalize">{persona.review_style} · {persona.city}</p>
 
-            {/* Right Column: History */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Review History */}
-              <div className="card-accent p-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <FileText className="w-5 h-5 text-oracle-amber-500" />
-                  <h3 className="font-bold text-lg">Review History</h3>
-                  <span className="ml-auto text-text-secondary text-sm">{persona.reviews.length} Total Reviews</span>
+                  <div className="space-y-4 pt-6 border-t border-oracle-ash">
+                    <div>
+                      <p className="text-text-tertiary text-xs uppercase">Location</p>
+                      <p className="text-text-primary font-medium">{persona.city}, NG</p>
+                    </div>
+                    {persona.lga && (
+                      <div>
+                        <p className="text-text-tertiary text-xs uppercase">LGA</p>
+                        <p className="text-text-primary font-medium">{persona.lga}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-text-tertiary text-xs uppercase">Primary Language</p>
+                      <p className="text-text-primary font-medium capitalize">{persona.primary_language}</p>
+                    </div>
+                    {persona.age_range && (
+                      <div>
+                        <p className="text-text-tertiary text-xs uppercase">Age Range</p>
+                        <p className="text-text-primary font-medium">{persona.age_range}</p>
+                      </div>
+                    )}
+                    <div>
+                      <p className="text-text-tertiary text-xs uppercase">Status</p>
+                      <p className={`font-medium text-sm uppercase ${statusColor(persona.status ?? '')}`}>
+                        {persona.status}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-4">
-                  {persona.reviews.map((review, i) => (
-                    <div key={i} className="border-b border-oracle-ash last:border-0 pb-4 last:pb-0">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <p className="font-medium text-text-primary">{review.product}</p>
-                          <p className="text-sm text-text-secondary mt-1">{review.excerpt}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className={`text-xs font-medium uppercase ${
-                            review.sentiment === 'POSITIVE' ? 'text-oracle-green-500' :
-                            review.sentiment === 'NEGATIVE' ? 'text-oracle-terra-500' :
-                            'text-oracle-amber-500'
-                          }`}>
-                            {review.sentiment}
-                          </p>
-                          <p className="text-sm font-mono text-oracle-amber-500">{review.score}</p>
-                        </div>
+                {/* Voice Fingerprint */}
+                <div className="card-accent p-8">
+                  <h3 className="font-bold mb-6">Voice Fingerprint</h3>
+                  {persona.voice_radar ? (
+                    <RadarChart data={persona.voice_radar} />
+                  ) : (
+                    <div className="h-32 flex items-center justify-center text-text-tertiary text-sm">
+                      No radar data
+                    </div>
+                  )}
+
+                  <div className="space-y-3 text-sm mt-2">
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-text-secondary">Pidgin Intensity</span>
+                        <span className="text-oracle-amber-500 font-mono">
+                          {Math.round((persona.pidgin_intensity ?? 0) * 100)}%
+                        </span>
+                      </div>
+                      <div className="w-full h-1 bg-oracle-ash rounded overflow-hidden">
+                        <div className="h-full bg-oracle-amber-500" style={{ width: `${Math.round((persona.pidgin_intensity ?? 0) * 100)}%` }} />
                       </div>
                     </div>
-                  ))}
+                    <div>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-text-secondary">Cultural Density</span>
+                        <span className="text-oracle-amber-500 font-mono">{persona.cultural_density ?? 0}%</span>
+                      </div>
+                      <div className="w-full h-1 bg-oracle-ash rounded overflow-hidden">
+                        <div className="h-full bg-oracle-amber-500" style={{ width: `${persona.cultural_density ?? 0}%` }} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {persona.cultural_markers && persona.cultural_markers.length > 0 && (
+                    <div className="mt-4 pt-4 border-t border-oracle-ash">
+                      <p className="text-text-tertiary text-xs uppercase mb-2">Cultural Markers</p>
+                      <div className="flex flex-wrap gap-1">
+                        {persona.cultural_markers.map((m) => (
+                          <span key={m} className="pidgin-anchor text-xs">{m}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Recommendation History */}
-              <div className="card-accent p-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <Lightbulb className="w-5 h-5 text-oracle-green-500" />
-                  <h3 className="font-bold text-lg">Recommendation History</h3>
-                  <span className="ml-auto text-oracle-green-500 text-sm font-medium">View All</span>
-                </div>
+              {/* Right: History */}
+              <div className="lg:col-span-2 space-y-8">
+                {/* Sample Reviews */}
+                {persona.sample_reviews && persona.sample_reviews.length > 0 && (
+                  <div className="card-accent p-8">
+                    <div className="flex items-center gap-2 mb-6">
+                      <FileText className="w-5 h-5 text-oracle-amber-500" />
+                      <h3 className="font-bold text-lg">Sample Reviews</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {persona.sample_reviews.map((r, i) => (
+                        <p key={i} className="text-text-secondary text-sm italic border-l-2 border-oracle-amber-500/30 pl-3">
+                          "{r}"
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-                <div className="space-y-4">
-                  {persona.recommendations.map((rec, i) => (
-                    <div
-                      key={i}
-                      className="p-4 bg-oracle-charcoal border border-oracle-ash rounded-lg hover:border-oracle-amber-500 transition-colors cursor-pointer"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-text-primary">{rec.product}</p>
-                          <p className="text-sm text-text-secondary mt-1">{rec.reason}</p>
-                        </div>
-                        <div className="text-right">
-                          <div className="relative w-12 h-12 flex items-center justify-center">
-                            <svg className="w-full h-full transform -rotate-90">
-                              <circle cx="24" cy="24" r="20" fill="none" stroke="#3D3B37" strokeWidth="3" />
-                              <circle
-                                cx="24"
-                                cy="24"
-                                r="20"
-                                fill="none"
-                                stroke="#2DB37A"
-                                strokeWidth="3"
-                                strokeDasharray={`${2 * Math.PI * 20 * parseInt(rec.fit) / 100} ${2 * Math.PI * 20}`}
-                              />
-                            </svg>
-                            <span className="absolute font-mono text-xs font-bold text-oracle-green-500">{rec.fit}</span>
+                {/* Review History from API */}
+                <div className="card-accent p-8">
+                  <div className="flex items-center gap-2 mb-6">
+                    <FileText className="w-5 h-5 text-oracle-amber-500" />
+                    <h3 className="font-bold text-lg">Review History</h3>
+                    <span className="ml-auto text-text-secondary text-sm">{reviews.length} Records</span>
+                  </div>
+
+                  {reviews.length === 0 ? (
+                    <p className="text-text-tertiary text-sm text-center py-6">
+                      No review history yet — run a simulation with this persona.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {reviews.map((item, i) => (
+                        <div key={i} className="border-b border-oracle-ash last:border-0 pb-4 last:pb-0">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="font-medium text-text-primary">
+                                {item.product_name ?? item.product ?? 'Product'}
+                              </p>
+                              {item.review_text && (
+                                <p className="text-sm text-text-secondary mt-1 italic">"{item.review_text}"</p>
+                              )}
+                            </div>
+                            <div className="text-right shrink-0 ml-4">
+                              {item.sentiment && (
+                                <p className={`text-xs font-medium uppercase ${
+                                  item.sentiment === 'POSITIVE' ? 'text-oracle-green-500' :
+                                  item.sentiment === 'NEGATIVE' ? 'text-oracle-terra-500' :
+                                  'text-oracle-amber-500'
+                                }`}>{item.sentiment}</p>
+                              )}
+                              {item.bertscore !== undefined && (
+                                <p className="text-sm font-mono text-oracle-amber-500">{item.bertscore.toFixed(2)}</p>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
+
+                {/* Recommendation History */}
+                <div className="card-accent p-8">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Lightbulb className="w-5 h-5 text-oracle-green-500" />
+                    <h3 className="font-bold text-lg">Recommendation History</h3>
+                  </div>
+
+                  {recs.length === 0 ? (
+                    <p className="text-text-tertiary text-sm text-center py-6">
+                      No recommendations yet — run the recommendation engine with this persona.
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {recs.map((rec, i) => {
+                        const pct = Math.round((rec.fit_score ?? 0) * 100)
+                        return (
+                          <div key={i} className="p-4 bg-oracle-charcoal border border-oracle-ash rounded-lg hover:border-oracle-amber-500 transition-colors">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <p className="font-medium text-text-primary">
+                                  {rec.product_name ?? rec.product ?? 'Recommendation'}
+                                </p>
+                                {rec.reasoning && (
+                                  <p className="text-sm text-text-secondary mt-1">{rec.reasoning}</p>
+                                )}
+                              </div>
+                              <div className="relative w-12 h-12 flex items-center justify-center shrink-0 ml-4">
+                                <svg className="w-full h-full transform -rotate-90">
+                                  <circle cx="24" cy="24" r="20" fill="none" stroke="#3D3B37" strokeWidth="3" />
+                                  <circle
+                                    cx="24" cy="24" r="20" fill="none"
+                                    stroke="#2DB37A" strokeWidth="3"
+                                    strokeDasharray={`${2 * Math.PI * 20 * pct / 100} ${2 * Math.PI * 20}`}
+                                  />
+                                </svg>
+                                <span className="absolute font-mono text-xs font-bold text-oracle-green-500">{pct}%</span>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Categories */}
+                {persona.categories_reviewed && persona.categories_reviewed.length > 0 && (
+                  <div className="card-accent p-8">
+                    <h3 className="font-bold text-lg mb-4">Categories Reviewed</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {persona.categories_reviewed.map((cat) => (
+                        <span key={cat} className="px-3 py-1 rounded-full border border-oracle-ash text-text-secondary text-xs capitalize">
+                          {cat.replace(/_/g, ' ')}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
     </div>

@@ -19,7 +19,12 @@ from app.services.embedding_service import EmbeddingService
 from app.models.persona import Persona, PersonaCreate
 from app.models.review import ReviewRequest, Product, Context
 from app.models.recommendation import RecommendationRequest
-from app.ml.evaluator import NaijaOracleEvaluator
+
+# Try to import evaluator, but make it optional
+try:
+    from app.ml.evaluator import NaijaOracleEvaluator
+except ImportError:
+    NaijaOracleEvaluator = None
 
 
 @pytest.fixture(scope="session")

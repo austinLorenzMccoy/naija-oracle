@@ -8,7 +8,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Dict, Any
 
 from app.services.supabase_client import SupabaseClient
-from app.config import settings
 
 router = APIRouter()
 security = HTTPBearer()

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
 import { Zap, Download, Save, TrendingDown, Lightbulb } from 'lucide-react'
+import { API_BASE } from '@/lib/api'
 
 const SVGRadar = () => (
   <svg viewBox="0 0 120 140" className="w-full max-w-xs">
@@ -51,12 +52,21 @@ export default function Simulate() {
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
+  const [saved, setSaved] = useState(false)
+
+  const priceTierMap: Record<string, string> = {
+    Masstige: 'premium',
+    Luxury: 'luxury',
+    Economy: 'budget'
+  }
 
   const handleGenerate = async () => {
     setIsGenerating(true)
+    setError(null)
+    setSaved(false)
     try {
       // Call backend API only (secure approach)
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8003/api/v1'}/simulate-review`, {
+      const response = await fetch(`${API_BASE}/simulate-review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -68,7 +78,7 @@ export default function Simulate() {
             name: formData.productName,
             category: formData.category.toLowerCase(),
             location: formData.targetCity,
-            price_tier: formData.priceTier.toLowerCase()
+            price_tier: priceTierMap[formData.priceTier] || 'mid'
           },
           context: {
             time_of_day: 'evening',
@@ -100,6 +110,24 @@ export default function Simulate() {
     } finally {
       setIsGenerating(false)
     }
+  }
+
+  const exportResult = () => {
+    if (!result) return
+    const url = URL.createObjectURL(new Blob([JSON.stringify({ formData, result }, null, 2)], { type: 'application/json' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `simulation-${formData.productName.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const saveResult = () => {
+    if (!result) return
+    const savedResults = JSON.parse(localStorage.getItem('naija-oracle-simulations') || '[]')
+    savedResults.unshift({ id: crypto.randomUUID(), createdAt: new Date().toISOString(), formData, result })
+    localStorage.setItem('naija-oracle-simulations', JSON.stringify(savedResults.slice(0, 20)))
+    setSaved(true)
   }
 
   return (
@@ -339,13 +367,21 @@ export default function Simulate() {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <button className="px-4 py-2 border border-oracle-ash text-text-secondary text-xs hover:bg-oracle-smoke transition-colors rounded">
+                          <button
+                            onClick={exportResult}
+                            className="px-4 py-2 border border-oracle-ash text-text-secondary text-xs hover:bg-oracle-smoke transition-colors rounded"
+                            type="button"
+                          >
                             <Download className="w-4 h-4 inline mr-2" />
                             Export JSON
                           </button>
-                          <button className="px-4 py-2 bg-oracle-smoke text-text-primary text-xs border border-oracle-ash hover:border-oracle-amber-500 transition-colors rounded">
+                          <button
+                            onClick={saveResult}
+                            className="px-4 py-2 bg-oracle-smoke text-text-primary text-xs border border-oracle-ash hover:border-oracle-amber-500 transition-colors rounded"
+                            type="button"
+                          >
                             <Save className="w-4 h-4 inline mr-2" />
-                            Save to Library
+                            {saved ? 'Saved' : 'Save to Library'}
                           </button>
                         </div>
                       </div>
@@ -393,6 +429,11 @@ export default function Simulate() {
                 <div className="card-accent p-12 flex flex-col items-center justify-center min-h-96">
                   <Zap className="w-12 h-12 text-oracle-amber-500 mb-4 opacity-50" />
                   <p className="text-text-secondary">Configure your simulation and click "Run Simulation" to generate</p>
+                  {error && (
+                    <p className="mt-4 rounded border border-oracle-terra-500/50 bg-oracle-terra-500/10 px-4 py-2 text-sm text-oracle-terra-300">
+                      {error}
+                    </p>
+                  )}
                 </div>
               )}
             </div>

@@ -253,6 +253,9 @@ Thumbs.db
 *.orig
 *.rej
 
+# Claude Code project memory
+.claude/
+
 # Local development
 .local/
 local/

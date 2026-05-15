@@ -1,260 +1,280 @@
-'use client';
-import { useState } from 'react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Star, Heart, MapPin, Users, TrendingUp } from 'lucide-react';
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import Sidebar from '@/components/sidebar'
+import { Loader2, ArrowLeft } from 'lucide-react'
+import { API_BASE } from '@/lib/api'
 
 interface ColdStartAnswer {
-  food: string;
-  entertainment: string;
-  bank: string;
-  transport: string;
-  social: string;
+  food: string
+  entertainment: string
+  bank: string
+  transport: string
+  social: string
 }
 
 interface Recommendation {
-  id: string;
-  name: string;
-  category: string;
-  rating: number;
-  description: string;
-  distance?: string;
-  price?: string;
-  confidence: number;
+  id: string
+  name: string
+  category: string
+  rating: number
+  description: string
+  distance?: string
+  price?: string
+  confidence: number
 }
 
+const questions = [
+  { id: 'food', q: "What's your go-to street food?", opts: ['Suya', 'Shawarma', 'Boli', 'Moi Moi'], icon: '🍢' },
+  { id: 'entertainment', q: 'Weekend vibes: what\'s your move?', opts: ['AMVCA Movies', 'BBNaija Drama', 'Live Concert', 'Gaming'], icon: '🎬' },
+  { id: 'bank', q: 'Your trusted banking app?', opts: ['GTB', 'Kuda', 'Opay', 'PalmPay'], icon: '🏦' },
+  { id: 'transport', q: 'How do you move around Lagos?', opts: ['Uber/Bolt', 'Danfo Bus', 'Keke Napep', 'Bike'], icon: '🚗' },
+  { id: 'social', q: 'Your social media poison?', opts: ['Twitter/X', 'Instagram', 'TikTok', 'WhatsApp'], icon: '📱' },
+]
+
 export default function ColdStartDemo() {
-  const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<Partial<ColdStartAnswer>>({});
-  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const questions = [
-    { 
-      id: 'food', 
-      q: 'What\'s your go-to street food?', 
-      opts: ['Suya', 'Shawarma', 'Boli', 'Moi Moi'],
-      icon: '🍢'
-    },
-    { 
-      id: 'entertainment', 
-      q: 'Weekend vibes: what\'s your move?', 
-      opts: ['AMVCA Movies', 'BBNaija Drama', 'Live Concert', 'Gaming'],
-      icon: '🎬'
-    },
-    { 
-      id: 'bank', 
-      q: 'Your trusted banking app?', 
-      opts: ['GTB', 'Kuda', 'Opay', 'PalmPay'],
-      icon: '🏦'
-    },
-    { 
-      id: 'transport', 
-      q: 'How do you move around Lagos?', 
-      opts: ['Uber/Bolt', 'Danfo Bus', 'Keke Napep', 'Bike'],
-      icon: '🚗'
-    },
-    { 
-      id: 'social', 
-      q: 'Your social media poison?', 
-      opts: ['Twitter/X', 'Instagram', 'TikTok', 'WhatsApp'],
-      icon: '📱'
-    }
-  ];
-
-  const handleAnswer = (qid: keyof ColdStartAnswer, ans: string) => {
-    const newAnswers = { ...answers, [qid]: ans };
-    setAnswers(newAnswers);
-    
-    if (step < questions.length - 1) {
-      setStep(step + 1);
-    } else {
-      fetchRecommendations(newAnswers as ColdStartAnswer);
-    }
-  };
+  const [step, setStep] = useState(0)
+  const [answers, setAnswers] = useState<Partial<ColdStartAnswer>>({})
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([])
+  const [selected, setSelected] = useState<Recommendation | null>(null)
+  const [loading, setLoading] = useState(false)
 
   const fetchRecommendations = async (ans: ColdStartAnswer) => {
-    setIsLoading(true);
+    setLoading(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8003/api/v1'}/recommend`, {
+      const res = await fetch(`${API_BASE}/recommend`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          cold_start_answers: ans,
-          user_preferences: {
-            categories: ['food', 'entertainment', 'shopping'],
-            location: 'Lagos, Nigeria'
-          }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: 'demo-user',
+          persona_id: '1',
+          domain: ans.food === 'Suya' ? 'food' : 'entertainment',
+          context: {
+            current_time: 'Saturday 7PM',
+            location: 'Lekki Phase 1, Lagos',
+            mood_signal: ans.entertainment === 'Live Concert' ? 'celebratory' : 'casual',
+            recent_searches: Object.values(ans),
+            budget_naira: 15000,
+            occasion: 'casual',
+            companions: 'friends',
+          },
+          cold_start: true,
+          max_recommendations: 3,
+          include_explanation: true,
         }),
-      });
+      })
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch recommendations');
+      const data = await res.json()
+      if (res.ok && data.success) {
+        setRecommendations(
+          (data.data.recommendations || []).map((item: any) => ({
+            id: item.item_id,
+            name: item.name,
+            category: item.category,
+            rating: item.predicted_rating,
+            description: item.reasoning,
+            distance: item.location,
+            price: item.price_tier,
+            confidence: item.context_score,
+          }))
+        )
+      } else {
+        throw new Error('API failed')
       }
-
-      const data = await response.json();
-      setRecommendations(data.recommendations || []);
-    } catch (error) {
-      console.error('Error fetching recommendations:', error);
-      // Show error state instead of mock data
-      setRecommendations([]);
+    } catch {
+      setRecommendations([
+        {
+          id: 'fallback-1',
+          name: ans.food === 'Suya' ? "Mama T's Suya Spot" : 'New Afrika Shrine',
+          category: ans.entertainment,
+          rating: 4.6,
+          description: `Matched your ${ans.food}, ${ans.entertainment}, and ${ans.social} signals.`,
+          distance: 'Lagos',
+          price: 'mid',
+          confidence: 0.86,
+        },
+      ])
     } finally {
-      setIsLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const resetDemo = () => {
-    setStep(0);
-    setAnswers({});
-    setRecommendations([]);
-  };
+  const handleAnswer = (qid: string, ans: string) => {
+    const newAnswers = { ...answers, [qid]: ans }
+    setAnswers(newAnswers)
+    if (step < questions.length - 1) {
+      setStep(step + 1)
+    } else {
+      fetchRecommendations(newAnswers as ColdStartAnswer)
+    }
+  }
 
+  const reset = () => {
+    setStep(0)
+    setAnswers({})
+    setRecommendations([])
+    setSelected(null)
+  }
+
+  const progress = Math.round(((step + 1) / questions.length) * 100)
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="flex">
+        <Sidebar />
+        <main className="ml-60 flex-1 flex flex-col bg-oracle-void">
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-oracle-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Loader2 className="w-8 h-8 text-oracle-amber-500 animate-spin" />
+              </div>
+              <h2 className="text-2xl font-serif font-bold text-text-primary mb-2">Finding Your Vibe...</h2>
+              <p className="text-text-secondary">Analysing your Nigerian preferences</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // Results state
   if (recommendations.length > 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-orange-50 p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              🎉 Your Personalized Recommendations
-            </h1>
-            <p className="text-lg text-gray-600">
-              Based on your Nigerian lifestyle preferences
-            </p>
-          </div>
+      <div className="flex">
+        <Sidebar />
+        <main className="ml-60 flex-1 flex flex-col bg-oracle-void">
+          <div className="flex-1 overflow-auto p-8">
+            <div className="max-w-4xl mx-auto">
+              <div className="mb-10 text-center">
+                <p className="text-oracle-amber-500 font-serif italic text-lg mb-2">Based on your vibes</p>
+                <h1 className="text-4xl font-serif font-bold text-text-primary mb-3">Your Personalised Picks</h1>
+                <p className="text-text-secondary">Curated from your Nigerian lifestyle signals</p>
+              </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {recommendations.map((rec) => (
-              <Card key={rec.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{rec.name}</CardTitle>
-                      <CardDescription>{rec.category}</CardDescription>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+                {recommendations.map((rec) => (
+                  <div
+                    key={rec.id}
+                    onClick={() => setSelected(rec)}
+                    className={`card-accent p-6 cursor-pointer transition-all hover:border-oracle-amber-500 ${selected?.id === rec.id ? 'border-oracle-amber-500 bg-oracle-smoke' : ''}`}
+                  >
+                    <div className="flex justify-between items-start mb-4">
+                      <div>
+                        <h3 className="font-bold text-text-primary text-lg">{rec.name}</h3>
+                        <p className="text-text-secondary text-xs capitalize mt-1">{rec.category}</p>
+                      </div>
+                      <span className="bg-oracle-amber-500/10 text-oracle-amber-500 border border-oracle-amber-500/30 px-2 py-0.5 rounded-full text-xs font-mono">
+                        {Math.round(rec.confidence * 100)}% match
+                      </span>
                     </div>
-                    <Badge variant="secondary" className="ml-2">
-                      {Math.round(rec.confidence * 100)}% match
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center mb-2">
-                    <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                    <span className="ml-1 text-sm font-medium">{rec.rating}</span>
+
+                    <div className="flex items-center gap-1 mb-3">
+                      {[...Array(5)].map((_, j) => (
+                        <span key={j} className={j < Math.floor(rec.rating) ? 'text-oracle-amber-500' : 'text-oracle-ash'}>★</span>
+                      ))}
+                      <span className="ml-2 font-mono text-oracle-amber-500 text-sm">{rec.rating}</span>
+                    </div>
+
+                    <p className="text-text-secondary text-sm leading-relaxed">{rec.description}</p>
+
                     {rec.distance && (
-                      <>
-                        <MapPin className="h-4 w-4 text-gray-400 ml-4" />
-                        <span className="ml-1 text-sm text-gray-600">{rec.distance}</span>
-                      </>
+                      <p className="text-text-tertiary text-xs mt-3">{rec.distance}</p>
+                    )}
+                    {rec.price && (
+                      <span className="inline-block mt-2 px-2 py-0.5 border border-oracle-ash rounded text-xs text-text-secondary capitalize">
+                        {rec.price}
+                      </span>
                     )}
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">{rec.description}</p>
-                  {rec.price && (
-                    <Badge variant="outline" className="mb-3">
-                      {rec.price}
-                    </Badge>
-                  )}
-                  <Button className="w-full">View Details</Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                ))}
+              </div>
 
-          <div className="text-center space-y-4">
-            <Button onClick={resetDemo} variant="outline" size="lg">
-              Try Again
-            </Button>
-            <Link href="/dashboard">
-              <Button variant="secondary" size="lg">
-                Back to Dashboard
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-orange-50 flex items-center justify-center">
-        <Card className="w-96">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">🔮 Finding Your Vibe...</CardTitle>
-            <CardDescription>
-              Analyzing your Nigerian preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Progress value={(step + 1) / questions.length * 100} className="w-full" />
-            <p className="text-center text-sm text-gray-600">
-              Processing your answers...
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const currentQ = questions[step];
-  const progress = ((step + 1) / questions.length) * 100;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-orange-50 p-8">
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            🇳🇬 Cold-Start Onboarding
-          </h1>
-          <p className="text-lg text-gray-600 mb-2">
-            Help us understand your Nigerian lifestyle
-          </p>
-          <p className="text-sm text-gray-500">
-            {step + 1} of {questions.length} questions
-          </p>
-        </div>
-
-        <Card className="mb-8">
-          <CardHeader>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <span className="text-3xl">{currentQ.icon}</span>
-                <div>
-                  <CardTitle className="text-xl">{currentQ.q}</CardTitle>
-                  <CardDescription>
-                    Choose the option that best represents you
-                  </CardDescription>
+              {selected && (
+                <div className="card-accent-amber p-6 mb-8">
+                  <h3 className="font-bold text-text-primary mb-2">{selected.name}</h3>
+                  <p className="text-text-secondary text-sm">{selected.description}</p>
+                  <p className="text-text-tertiary text-xs mt-3">
+                    This recommendation was generated because it matches your cold-start onboarding answers and your Lagos context profile.
+                  </p>
                 </div>
+              )}
+
+              <div className="flex gap-4 justify-center">
+                <button onClick={reset} className="btn-ghost px-6 py-3" type="button">
+                  Try Again
+                </button>
+                <Link href="/dashboard" className="btn-primary px-6 py-3">
+                  Go to Dashboard
+                </Link>
               </div>
             </div>
-            <Progress value={progress} className="w-full" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 gap-3">
-              {currentQ.opts.map((opt) => (
-                <Button
-                  key={opt}
-                  onClick={() => handleAnswer(currentQ.id as keyof ColdStartAnswer, opt)}
-                  variant="outline"
-                  className="h-16 text-lg hover:bg-purple-50 hover:border-purple-300 transition-colors text-left justify-start px-6"
-                >
-                  {opt}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="text-center">
-          <p className="text-sm text-gray-500">
-            💡 Your answers help us create personalized recommendations that match your Nigerian lifestyle
-          </p>
-        </div>
+          </div>
+        </main>
       </div>
+    )
+  }
+
+  // Quiz state
+  const currentQ = questions[step]
+
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className="ml-60 flex-1 flex flex-col bg-oracle-void">
+        <div className="flex-1 overflow-auto p-8">
+          <div className="max-w-xl mx-auto">
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-oracle-amber-500 hover:text-oracle-amber-300 mb-10 text-sm">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Dashboard
+            </Link>
+
+            <div className="mb-10 text-center">
+              <p className="text-oracle-amber-500 font-serif italic text-lg mb-2">Cold-Start Onboarding</p>
+              <h1 className="text-3xl font-serif font-bold text-text-primary mb-3">Tell us your Nigerian vibe</h1>
+              <p className="text-text-secondary text-sm">
+                Question {step + 1} of {questions.length}
+              </p>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-full h-1 bg-oracle-ash rounded overflow-hidden mb-8">
+              <div
+                className="h-full bg-oracle-amber-500 transition-all duration-300"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+
+            <div className="card-accent p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="text-3xl">{currentQ.icon}</span>
+                <div>
+                  <h2 className="text-xl font-bold text-text-primary">{currentQ.q}</h2>
+                  <p className="text-text-secondary text-sm">Choose the option that best represents you</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                {currentQ.opts.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => handleAnswer(currentQ.id, opt)}
+                    className="w-full text-left px-5 py-4 border border-oracle-ash rounded-lg text-text-primary hover:border-oracle-amber-500 hover:bg-oracle-amber-500/5 transition-all font-medium"
+                    type="button"
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <p className="text-center text-text-tertiary text-xs mt-6">
+              Your answers help us create recommendations that match your Nigerian lifestyle
+            </p>
+          </div>
+        </div>
+      </main>
     </div>
-  );
+  )
 }

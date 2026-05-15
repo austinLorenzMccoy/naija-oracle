@@ -26,12 +26,13 @@ services:
 
   # Frontend
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_BASE_URL=http://localhost:9000/api/v1
     container_name: naija_oracle_frontend
     environment:
-      - VITE_SUPABASE_URL=${SUPABASE_URL}
-      - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - VITE_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:9000/api/v1
     ports:
       - "3001:3000"
     depends_on:

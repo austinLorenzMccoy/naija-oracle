@@ -131,7 +131,8 @@ class RecommendationEngine:
             reasoning_result = await self._reason_about_request(persona, request)
             retrieval_result = await self._retrieve_candidates(persona, request, reasoning_result)
             ranking_result = await self._rank_recommendations(persona, request, retrieval_result)
-            refined_result = await self._refine_with_context(persona, request, ranking_result)
+            ranked_recommendations = ranking_result["recommendations"]
+            refined_result = await self._refine_with_context(persona, request, ranked_recommendations)
             
             # Generate explanation
             explanation = await self._generate_explanation(persona, request, refined_result)
@@ -261,7 +262,7 @@ class RecommendationEngine:
         persona: Persona, 
         request: RecommendationRequest, 
         reasoning: Dict[str, Any]
-    ) -> List[Dict[str, Any]]:
+    ) -> Dict[str, Any]:
         """R4 Step 2: Retrieve candidate recommendations"""
         
         candidates = []
@@ -362,12 +363,15 @@ class RecommendationEngine:
         candidates.sort(key=lambda x: x["context_score"], reverse=True)
         
         boost_factors = {
-            "mood_boost": mood_boosts.get(request.context.mood_signal, {}),
+            "mood_boost": max(mood_boosts.get(request.context.mood_signal, {}).values(), default=0.0),
             "time_boost": 0.1 if "night" in request.context.current_time.lower() else 0.0,
             "location_boost": 0.15 if "lagos" in request.context.location.lower() else 0.0
         }
         
-        return candidates[:20]  # Return top 20 for further processing
+        return {
+            "recommendations": candidates[:20],
+            "boost_factors": boost_factors,
+        }
     
     async def _refine_with_context(
         self, 

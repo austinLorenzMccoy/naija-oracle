@@ -1,11 +1,19 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
 import { Download, Calendar, Filter, ArrowLeft, FileText } from 'lucide-react'
 
-const reports = [
+interface Report {
+  title: string
+  month: string
+  metrics: Record<string, string>
+  generated: string
+}
+
+const reports: Report[] = [
   {
     title: 'Monthly Performance Report',
     month: 'April 2026',
@@ -34,6 +42,59 @@ const reports = [
 
 export default function Reports() {
   const router = useRouter()
+  const [reportList, setReportList] = useState<Report[]>(reports)
+  const [period, setPeriod] = useState<'All' | 'April 2026' | 'Q1 2026'>('All')
+  const [type, setType] = useState<'All' | 'Performance' | 'Cultural' | 'Regional' | 'Persona'>('All')
+  const [schedules, setSchedules] = useState([
+    { name: 'Weekly Performance Report', cadence: 'Every Monday at 9:00 AM', editing: false },
+    { name: 'Monthly Insights Report', cadence: '1st of every month at 8:00 AM', editing: false },
+  ])
+  const [notice, setNotice] = useState<string | null>(null)
+
+  const showNotice = (message: string) => {
+    setNotice(message)
+    window.setTimeout(() => setNotice(null), 2400)
+  }
+
+  const cyclePeriod = () => {
+    const options = ['All', 'April 2026', 'Q1 2026'] as const
+    setPeriod(options[(options.indexOf(period) + 1) % options.length])
+  }
+
+  const cycleType = () => {
+    const options = ['All', 'Performance', 'Cultural', 'Regional', 'Persona'] as const
+    setType(options[(options.indexOf(type) + 1) % options.length])
+  }
+
+  const visibleReports = reportList.filter((report) => {
+    const matchesPeriod = period === 'All' || report.month === period
+    const matchesType = type === 'All' || report.title.includes(type)
+    return matchesPeriod && matchesType
+  })
+
+  const downloadReport = (report: Report) => {
+    const url = URL.createObjectURL(new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${report.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.json`
+    link.click()
+    URL.revokeObjectURL(url)
+    showNotice('Report downloaded')
+  }
+
+  const generateReport = () => {
+    const generated = new Date().toISOString().slice(0, 10)
+    setReportList((current) => [
+      {
+        title: 'On-Demand Workflow Report',
+        month: 'May 2026',
+        metrics: { workflows: '18/18', pages: '6', status: '100%' },
+        generated
+      },
+      ...current
+    ])
+    showNotice('New report generated')
+  }
 
   return (
     <div className="flex">
@@ -65,27 +126,28 @@ export default function Reports() {
                 <h1 className="text-3xl font-bold text-text-primary mb-2">Reports</h1>
                 <p className="text-text-secondary">Generated insights and performance summaries</p>
               </div>
-              <button className="btn-primary flex items-center gap-2">
+              <button onClick={generateReport} className="btn-primary flex items-center gap-2" type="button">
                 <Calendar className="w-4 h-4" />
                 Generate New Report
               </button>
             </div>
+            {notice && <p className="rounded border border-oracle-green-500/40 px-4 py-2 text-sm text-oracle-green-500">{notice}</p>}
 
             {/* Filters */}
             <div className="flex gap-4">
-              <button className="flex items-center gap-2 px-4 py-2 bg-oracle-charcoal border border-oracle-ash rounded-lg text-text-secondary hover:border-oracle-amber-500 transition-colors text-sm">
+              <button onClick={cyclePeriod} className="flex items-center gap-2 px-4 py-2 bg-oracle-charcoal border border-oracle-ash rounded-lg text-text-secondary hover:border-oracle-amber-500 transition-colors text-sm" type="button">
                 <Filter className="w-4 h-4" />
-                Period
+                Period: {period}
               </button>
-              <button className="flex items-center gap-2 px-4 py-2 bg-oracle-charcoal border border-oracle-ash rounded-lg text-text-secondary hover:border-oracle-amber-500 transition-colors text-sm">
+              <button onClick={cycleType} className="flex items-center gap-2 px-4 py-2 bg-oracle-charcoal border border-oracle-ash rounded-lg text-text-secondary hover:border-oracle-amber-500 transition-colors text-sm" type="button">
                 <Filter className="w-4 h-4" />
-                Type
+                Type: {type}
               </button>
             </div>
 
             {/* Reports List */}
             <div className="space-y-4">
-              {reports.map((report, i) => (
+              {visibleReports.map((report, i) => (
                 <div key={i} className="card-accent p-6 hover:border-oracle-ash transition-colors cursor-pointer group">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-4 flex-1">
@@ -103,7 +165,11 @@ export default function Reports() {
                         </div>
                       </div>
                     </div>
-                    <button className="text-oracle-amber-500 hover:text-oracle-amber-300 transition-colors opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => downloadReport(report)}
+                      className="text-oracle-amber-500 hover:text-oracle-amber-300 transition-colors opacity-0 group-hover:opacity-100 transition-opacity"
+                      type="button"
+                    >
                       <Download className="w-5 h-5" />
                     </button>
                   </div>
@@ -116,22 +182,30 @@ export default function Reports() {
               <h3 className="text-lg font-bold mb-4">Scheduled Reports</h3>
               <p className="text-text-secondary text-sm mb-6">Set up automatic report generation and delivery</p>
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 bg-oracle-void rounded-lg border border-oracle-ash">
+                {schedules.map((schedule, index) => (
+                <div key={schedule.name} className="flex items-center justify-between p-4 bg-oracle-void rounded-lg border border-oracle-ash">
                   <div>
-                    <p className="text-sm font-medium text-text-primary">Weekly Performance Report</p>
-                    <p className="text-xs text-text-secondary mt-1">Every Monday at 9:00 AM</p>
+                    <p className="text-sm font-medium text-text-primary">{schedule.name}</p>
+                    <p className="text-xs text-text-secondary mt-1">{schedule.editing ? 'Paused for editing' : schedule.cadence}</p>
                   </div>
-                  <button className="text-oracle-amber-500 hover:text-oracle-amber-300">Edit</button>
+                  <button
+                    onClick={() => setSchedules((current) => current.map((item, i) => i === index ? { ...item, editing: !item.editing } : item))}
+                    className="text-oracle-amber-500 hover:text-oracle-amber-300"
+                    type="button"
+                  >
+                    {schedule.editing ? 'Save' : 'Edit'}
+                  </button>
                 </div>
-                <div className="flex items-center justify-between p-4 bg-oracle-void rounded-lg border border-oracle-ash">
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">Monthly Insights Report</p>
-                    <p className="text-xs text-text-secondary mt-1">1st of every month at 8:00 AM</p>
-                  </div>
-                  <button className="text-oracle-amber-500 hover:text-oracle-amber-300">Edit</button>
-                </div>
+                ))}
               </div>
-              <button className="w-full mt-4 px-4 py-2 border border-oracle-ash text-text-secondary hover:border-oracle-amber-500 hover:text-oracle-amber-300 rounded-lg transition-colors text-sm">
+              <button
+                onClick={() => {
+                  setSchedules((current) => [...current, { name: 'Custom Workflow Report', cadence: 'Every Friday at 4:00 PM', editing: false }])
+                  showNotice('Scheduled report added')
+                }}
+                className="w-full mt-4 px-4 py-2 border border-oracle-ash text-text-secondary hover:border-oracle-amber-500 hover:text-oracle-amber-300 rounded-lg transition-colors text-sm"
+                type="button"
+              >
                 + Add Scheduled Report
               </button>
             </div>

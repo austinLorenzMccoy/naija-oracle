@@ -2,51 +2,53 @@
 Configuration settings for Naija Oracle
 """
 
-import os
 from typing import Optional
-from dotenv import load_dotenv
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Load environment variables
-load_dotenv()
 
-# API Configuration
-API_V1_STR = "/api/v1"
-PROJECT_NAME = "Naija Oracle"
+class Settings(BaseSettings):
+    """Application settings loaded from environment variables"""
 
-# Groq Configuration
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_MODEL = "llama-3.1-70b-versatile"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+        extra="ignore",
+    )
 
-# Supabase Configuration
-SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-SUPABASE_ANON_KEY = os.getenv("SUPABASE_ANON_KEY", "")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY", "")
+    # API Configuration
+    API_V1_STR: str = "/api/v1"
+    PROJECT_NAME: str = "Naija Oracle"
 
-# DagsHub Configuration
-DAGSHUB_TOKEN = os.getenv("DAGSHUB_TOKEN", "")
-DAGSHUB_USERNAME = os.getenv("DAGSHUB_USERNAME", "")
+    # Groq Configuration
+    GROQ_API_KEY: str = ""
+    GROQ_MODEL: str = "llama-3.1-70b-versatile"
 
-# JWT Configuration
-JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-secret-key")
-JWT_ALGORITHM = "HS256"
-JWT_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
+    # Supabase Configuration
+    SUPABASE_URL: str = ""
+    SUPABASE_ANON_KEY: str = ""
+    SUPABASE_SERVICE_KEY: str = ""
 
-# Database Configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "")
+    # DagsHub Configuration
+    DAGSHUB_TOKEN: str = ""
+    DAGSHUB_USERNAME: str = ""
 
-# ML Configuration
-EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
-BERTSCORE_MODEL = "bert-base-multilingual-cased"
+    # JWT Configuration
+    JWT_SECRET_KEY: str = "your-secret-key"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 days
 
-# Cultural Voice Index Settings
-CVI_THRESHOLD = 0.6
-PIDGIN_INTENSITY_DEFAULT = 0.5
+    # Database Configuration
+    DATABASE_URL: str = ""
 
-# Evaluation Settings
-BERTSCORE_TARGET = 0.82
-ROUGE_L_TARGET = 0.35
-RMSE_TARGET = 0.75
-NDCG_TARGET = 0.847
+    # ML Configuration
+    EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+    BERTSCORE_MODEL: str = "bert-base-multilingual-cased"
 
-# Rate Limiting
-RATE_LIMIT_PER_MINUTE = 30
+    # Cultural Voice Index Settings
+    CVI_THRESHOLD: float = 0.6
+    PIDGIN_INTENSITY_DEFAULT: float = 0.5
+
+
+# Singleton settings instance used throughout the app
+settings = Settings()

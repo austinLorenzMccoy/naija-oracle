@@ -28,6 +28,10 @@ COPY . .
 # Disable Next.js telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# Accept API URL as a build arg so Next.js bakes it into the static export
+ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:9000/api/v1
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
 RUN npm run build
 
 # ── Stage 3: runner (production image) ───────────────────────────────────────

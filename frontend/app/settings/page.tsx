@@ -1,10 +1,31 @@
 'use client'
 
+import { useState } from 'react'
 import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
 import { Bell, Lock, Users, Key } from 'lucide-react'
 
 export default function Settings() {
+  const [workspace, setWorkspace] = useState('My Research Pod')
+  const [notice, setNotice] = useState<string | null>(null)
+  const [apiKey, setApiKey] = useState('sk-oracle-xxxxxxxxxxxxxxxx')
+  const [members, setMembers] = useState([
+    { name: 'You', email: 'emeka@example.com', role: 'Owner' },
+    { name: 'Zainab', email: 'zainab@example.com', role: 'Editor' },
+    { name: 'Tunde', email: 'tunde@example.com', role: 'Viewer' },
+  ])
+  const [notifications, setNotifications] = useState([
+    { label: 'Simulation Completed', desc: 'Notify when simulations finish running', enabled: true },
+    { label: 'Weekly Digest', desc: 'Summary of experiments and insights', enabled: true },
+    { label: 'Error Alerts', desc: 'Get notified of API or system issues', enabled: true },
+  ])
+  const [deleteArmed, setDeleteArmed] = useState(false)
+
+  const showNotice = (message: string) => {
+    setNotice(message)
+    window.setTimeout(() => setNotice(null), 2400)
+  }
+
   return (
     <div className="flex">
       <Sidebar />
@@ -17,6 +38,7 @@ export default function Settings() {
               <h1 className="text-3xl font-bold mb-2">Settings</h1>
               <p className="text-text-secondary">Manage your Oracle workspace and preferences</p>
             </div>
+            {notice && <p className="mb-6 rounded border border-oracle-green-500/40 px-4 py-2 text-sm text-oracle-green-500">{notice}</p>}
 
             <div className="space-y-8">
               {/* Account Section */}
@@ -39,11 +61,12 @@ export default function Settings() {
                     <label className="block text-text-secondary text-sm mb-2">Workspace Name</label>
                     <input
                       type="text"
-                      defaultValue="My Research Pod"
+                      value={workspace}
+                      onChange={(event) => setWorkspace(event.target.value)}
                       className="w-full bg-oracle-void border border-oracle-ash text-text-primary px-4 py-2 rounded-lg focus:border-oracle-amber-500 focus:outline-none"
                     />
                   </div>
-                  <button className="btn-primary">Save Changes</button>
+                  <button onClick={() => showNotice(`Workspace saved as ${workspace}`)} className="btn-primary" type="button">Save Changes</button>
                 </div>
               </div>
 
@@ -54,24 +77,25 @@ export default function Settings() {
                   Notifications
                 </h2>
                 <div className="space-y-4">
-                  {[
-                    { label: 'Simulation Completed', desc: 'Notify when simulations finish running' },
-                    { label: 'Weekly Digest', desc: 'Summary of experiments and insights' },
-                    { label: 'Error Alerts', desc: 'Get notified of API or system issues' },
-                  ].map((notif, i) => (
+                  {notifications.map((notif, i) => (
                     <div key={i} className="flex items-center justify-between p-4 border border-oracle-ash rounded-lg">
                       <div>
                         <p className="font-medium text-text-primary">{notif.label}</p>
                         <p className="text-text-secondary text-sm">{notif.desc}</p>
                       </div>
-                      <input type="checkbox" defaultChecked className="w-5 h-5 cursor-pointer" />
+                      <input
+                        type="checkbox"
+                        checked={notif.enabled}
+                        onChange={() => setNotifications((current) => current.map((item, index) => index === i ? { ...item, enabled: !item.enabled } : item))}
+                        className="w-5 h-5 cursor-pointer"
+                      />
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* API Keys */}
-              <div className="card-accent p-8">
+              <div id="api-keys" className="card-accent p-8">
                 <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                   <Key className="w-5 h-5 text-oracle-amber-500" />
                   API Keys
@@ -82,14 +106,32 @@ export default function Settings() {
                     <div className="flex gap-2">
                       <input
                         type="password"
-                        value="sk-oracle-xxxxxxxxxxxxxxxx"
+                        value={apiKey}
                         readOnly
                         className="flex-1 bg-oracle-charcoal border border-oracle-ash text-text-primary px-3 py-2 rounded text-sm font-mono"
                       />
-                      <button className="btn-ghost text-sm px-4">Copy</button>
+                      <button
+                        onClick={async () => {
+                          await navigator.clipboard.writeText(apiKey)
+                          showNotice('API key copied')
+                        }}
+                        className="btn-ghost text-sm px-4"
+                        type="button"
+                      >
+                        Copy
+                      </button>
                     </div>
                   </div>
-                  <button className="btn-primary">Generate New Key</button>
+                  <button
+                    onClick={() => {
+                      setApiKey(`sk-oracle-${crypto.randomUUID().replaceAll('-', '').slice(0, 20)}`)
+                      showNotice('New API key generated')
+                    }}
+                    className="btn-primary"
+                    type="button"
+                  >
+                    Generate New Key
+                  </button>
                 </div>
               </div>
 
@@ -100,11 +142,7 @@ export default function Settings() {
                   Team Members
                 </h2>
                 <div className="space-y-4 mb-6">
-                  {[
-                    { name: 'You', email: 'emeka@example.com', role: 'Owner' },
-                    { name: 'Zainab', email: 'zainab@example.com', role: 'Editor' },
-                    { name: 'Tunde', email: 'tunde@example.com', role: 'Viewer' },
-                  ].map((member, i) => (
+                  {members.map((member, i) => (
                     <div key={i} className="flex items-center justify-between p-4 border border-oracle-ash rounded-lg">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-oracle-amber-500/20 flex items-center justify-center text-oracle-amber-500 font-bold">
@@ -117,6 +155,7 @@ export default function Settings() {
                       </div>
                       <select
                         defaultValue={member.role}
+                        onChange={(event) => setMembers((current) => current.map((item, index) => index === i ? { ...item, role: event.target.value } : item))}
                         className="bg-oracle-void border border-oracle-ash text-text-primary px-3 py-1.5 rounded text-sm"
                       >
                         <option>Owner</option>
@@ -126,14 +165,35 @@ export default function Settings() {
                     </div>
                   ))}
                 </div>
-                <button className="btn-ghost">Invite Team Member</button>
+                <button
+                  onClick={() => {
+                    setMembers((current) => [...current, { name: `Guest ${current.length}`, email: `guest${current.length}@example.com`, role: 'Viewer' }])
+                    showNotice('Demo team member invited')
+                  }}
+                  className="btn-ghost"
+                  type="button"
+                >
+                  Invite Team Member
+                </button>
               </div>
 
               {/* Danger Zone */}
               <div className="card-accent border-l-4 border-l-oracle-terra-500 p-8">
                 <h2 className="text-xl font-bold mb-6 text-oracle-terra-500">Danger Zone</h2>
-                <button className="px-6 py-3 border border-oracle-terra-500 text-oracle-terra-500 rounded-lg hover:bg-oracle-terra-500/10 transition-colors">
-                  Delete Workspace
+                <button
+                  onClick={() => {
+                    if (!deleteArmed) {
+                      setDeleteArmed(true)
+                      showNotice('Click again to confirm delete')
+                      return
+                    }
+                    setDeleteArmed(false)
+                    showNotice('Demo workspace delete cancelled')
+                  }}
+                  className="px-6 py-3 border border-oracle-terra-500 text-oracle-terra-500 rounded-lg hover:bg-oracle-terra-500/10 transition-colors"
+                  type="button"
+                >
+                  {deleteArmed ? 'Confirm Delete' : 'Delete Workspace'}
                 </button>
               </div>
             </div>

@@ -1,8 +1,10 @@
 'use client'
 
+import { useState } from 'react'
 import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
-import { Send, MapPin } from 'lucide-react'
+import { Send, Loader2 } from 'lucide-react'
+import { API_BASE } from '@/lib/api'
 
 const recommendations = [
   {
@@ -26,6 +28,61 @@ const recommendations = [
 ]
 
 export default function Recommend() {
+  const [mood, setMood] = useState('celebratory')
+  const [budget, setBudget] = useState('15000')
+  const [location, setLocation] = useState('Lekki Phase 1, Lagos')
+  const [query, setQuery] = useState('')
+  const [items, setItems] = useState(recommendations)
+  const [explanation, setExplanation] = useState("I understand, Teniola. You're looking for that \"Luxe-Afrobeats\" intersection. Based on your current mood and budget, I've curated three spots in VI that hit the mark perfectly.")
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const requestRecommendations = async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const response = await fetch(`${API_BASE}/recommend`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: 'demo-user',
+          persona_id: '1',
+          domain: 'food',
+          context: {
+            current_time: 'Friday 8PM',
+            location,
+            mood_signal: mood,
+            recent_searches: query ? [query] : [],
+            budget_naira: Number(budget.replace(/[^\d.]/g, '')) || 15000,
+            occasion: 'after_work',
+            companions: 'friends'
+          },
+          max_recommendations: 3,
+          include_explanation: true,
+          temperature: 0.7
+        })
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Recommendation request failed')
+      }
+      setExplanation(data.data.explanation)
+      setItems(data.data.recommendations.map((item: any) => ({
+        name: item.name,
+        rating: item.predicted_rating,
+        reviews: `${Math.round(item.context_score * 100)}% fit`,
+        distance: item.distance_km ? `${item.distance_km}km away` : item.location,
+        price: item.price_tier,
+        reason: item.reasoning,
+        expanded: true
+      })))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Recommendation request failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="flex">
       <Sidebar />
@@ -53,6 +110,8 @@ export default function Recommend() {
                   <input
                     type="text"
                     placeholder="e.g., celebratory"
+                    value={mood}
+                    onChange={(event) => setMood(event.target.value)}
                     className="w-full bg-oracle-void border border-oracle-ash text-text-primary px-3 py-2 rounded text-sm focus:border-oracle-amber-500 focus:outline-none"
                   />
                 </div>
@@ -61,6 +120,8 @@ export default function Recommend() {
                   <input
                     type="text"
                     placeholder="e.g., ₦5k-₦15k"
+                    value={budget}
+                    onChange={(event) => setBudget(event.target.value)}
                     className="w-full bg-oracle-void border border-oracle-ash text-text-primary px-3 py-2 rounded text-sm focus:border-oracle-amber-500 focus:outline-none"
                   />
                 </div>
@@ -69,6 +130,8 @@ export default function Recommend() {
                   <input
                     type="text"
                     placeholder="e.g., Lekki"
+                    value={location}
+                    onChange={(event) => setLocation(event.target.value)}
                     className="w-full bg-oracle-void border border-oracle-ash text-text-primary px-3 py-2 rounded text-sm focus:border-oracle-amber-500 focus:outline-none"
                   />
                 </div>
@@ -93,12 +156,17 @@ export default function Recommend() {
                   <span className="text-oracle-amber-500 font-bold">[Oracle]</span>
                 </p>
                 <p className="text-text-primary leading-relaxed mb-4">
-                  I understand, Teniola. You're looking for that "Luxe-Afrobeats" intersection. Based on your current mood and budget, I've curated three spots in VI that hit the mark perfectly.
+                  {explanation}
                 </p>
+                {error && (
+                  <p className="mb-4 rounded border border-oracle-terra-500/50 bg-oracle-terra-500/10 px-3 py-2 text-sm text-oracle-terra-300">
+                    {error}
+                  </p>
+                )}
 
                 {/* Recommendation Cards */}
                 <div className="space-y-4">
-                  {recommendations.map((rec, i) => (
+                  {items.map((rec, i) => (
                     <div key={i} className="bg-oracle-void border border-oracle-ash rounded-lg p-4 hover:border-oracle-amber-500 transition-colors cursor-pointer">
                       <div className="flex justify-between items-start mb-3">
                         <div>
@@ -120,8 +188,12 @@ export default function Recommend() {
 
                       <p className="text-text-secondary text-sm mb-2">{rec.reason}</p>
                       {rec.expanded && (
-                        <button className="text-oracle-amber-500 hover:text-oracle-amber-300 text-xs font-medium">
-                          Why this? ▼
+                        <button
+                          onClick={() => setExplanation(`${rec.name}: ${rec.reason}`)}
+                          className="text-oracle-amber-500 hover:text-oracle-amber-300 text-xs font-medium"
+                          type="button"
+                        >
+                          Why this?
                         </button>
                       )}
                     </div>
@@ -131,16 +203,28 @@ export default function Recommend() {
 
               {/* Input */}
               <div className="mt-auto">
-                <div className="flex gap-3">
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault()
+                    requestRecommendations()
+                  }}
+                  className="flex gap-3"
+                >
                   <input
                     type="text"
                     placeholder="Ask for specific cultural nuances (e.g., 'no loud music', 'indoor seating')..."
+                    value={query}
+                    onChange={(event) => setQuery(event.target.value)}
                     className="flex-1 bg-oracle-charcoal border border-oracle-ash text-text-primary px-4 py-3 rounded-lg focus:border-oracle-amber-500 focus:outline-none"
                   />
-                  <button className="bg-oracle-amber-500 text-oracle-void px-4 py-3 rounded-lg hover:bg-oracle-amber-300 transition-colors">
-                    <Send className="w-5 h-5" />
+                  <button
+                    className="bg-oracle-amber-500 text-oracle-void px-4 py-3 rounded-lg hover:bg-oracle-amber-300 transition-colors disabled:opacity-60"
+                    type="submit"
+                    disabled={loading}
+                  >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                   </button>
-                </div>
+                </form>
               </div>
             </div>
           </section>
