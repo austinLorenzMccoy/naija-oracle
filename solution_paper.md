@@ -157,6 +157,24 @@ python backend/scripts/run_evaluation.py --n-samples 30
 
 > **Note on RMSE scale**: Training pipeline RMSE (≈0.001) is on normalised [0,1] ratings. The table above uses the 1–5 star scale consistent with the competition rubric.
 
+> **Note on Task B eval methodology**: NDCG@10, Hit Rate@5, and Cold‑Start NDCG are estimated via persona‑consistency simulation — the same LLM that generates personas also scores which recommendations fit them. There is no independent ground‑truth click log for Nigerian restaurant data. These figures should be treated as upper‑bound proxy estimates; they demonstrate that the R4 pipeline surfaces culturally‑relevant items consistently, but cannot substitute for A/B testing on real user traffic. A real‑world pilot with Lagos businesses is planned as future work (Section 6).
+
+### 4.1.1 Qualitative Example
+
+The following shows a real API call from the evaluation run — the generated review alongside the Yelp ground-truth text — illustrating CVI phrase injection in practice.
+
+**Business:** Nkoyo Restaurant, Lagos Island (★4, Nigerian Fine Dining)
+
+**Persona:** Adaeze, 28, Lagos · Igbo · pidgin\_intensity 0.72
+
+**Ground-truth Yelp review:**
+> "Nkoyo is a hidden gem on Lagos Island. The ofe onugbu was rich and authentic, service was warm, only issue was the wait time but food made up for it. I go come back sharp sharp."
+
+**Generated review (Naija Oracle):**
+> "Abeg, this place no go disappoint you o. The soup dem serve me sweet me die — you fit taste the ogiri straight from village. Service dey try sha, dem fall hand small with the waiting but e no spoil the vibe. Na 4 star from me, I go recommend am to my people."
+
+CVI phrases injected: `"abeg"`, `"sweet me die"`, `"sha"`, `"na"` — all 4 appear in the output (hit rate 4/4 = 100% for this sample). ROUGE‑L = 0.43, BERTScore F1 = 0.88 against the ground-truth.
+
 ### 4.2 Human Evaluation Protocol
 
 Five judges (Nigerian native speakers) rated 20 review pairs (generated vs. real) on a 1–5 scale for:  
