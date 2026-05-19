@@ -2,14 +2,14 @@
 ## Persona Simulator: Authentic Nigerian Consumer Voice Generation
 
 **Team:** Austin Lorenz McCoy  
-**Challenge:** DSN × BCT LLM Agent Challenge  
+**Challenge:** DSN x BCT LLM Agent Challenge  
 **Submission Date:** May 2026
 
 ---
 
 ## 1. Problem Statement
 
-Task A requires building an LLM-based agent capable of simulating authentic Nigerian consumer personas and generating product reviews that reflect genuine regional, linguistic, and cultural characteristics. The core challenge is avoiding generic AI English — the output must sound like a specific Nigerian person from a specific city and tribe.
+Task A requires an LLM-based agent that simulates authentic Nigerian consumer personas and generates product reviews reflecting genuine regional, linguistic, and cultural characteristics. The core challenge is avoiding generic AI English — the output must sound like a specific Nigerian person from a specific city and tribe.
 
 ---
 
@@ -19,37 +19,54 @@ Task A requires building an LLM-based agent capable of simulating authentic Nige
 
 ```
 ReviewRequest --> PersonaSimulator --> [CVI Lookup] --> GroqLLM --> ReviewResponse
-                      ↓                                          ↓
-                SupabaseClient                         BehaviouralFidelityScore
-                      ↓                                          ↓
-                DEMO_PERSONAS (fallback)               HumanEvalRubric (1–5)
+                       |                                                  |
+                 SupabaseClient                             BehaviouralFidelityScore
+                       |                                                  |
+               DEMO_PERSONAS (fallback)                    HumanEvalRubric (1-5)
 ```
 
 ### 2.2 Components
 
-**FastAPI Service** (`app/main.py`)
-- Endpoint: `POST /api/v1/simulate-review`
-- Endpoint: `GET /api/v1/personas`
-- Endpoint: `GET /api/v1/personas/{id}`
-- Graceful Supabase fallback: runs fully on embedded DEMO_PERSONAS when credentials are absent
+#### FastAPI Service — `app/main.py`
 
-**Persona Simulator** (`app/services/persona_simulator.py`)
-- Receives a `ReviewRequest` (persona_id, product, context, temperature)
-- Fetches persona from Supabase or DEMO_PERSONAS
-- Retrieves up to 5 matching CVI anchors
-- Generates review via Groq LLaMA-3.1-70B
-- Calculates: predicted rating, confidence interval, behavioural fidelity score, CVI anchor hit rate
-- Returns `ReviewResponse` with full generation metadata
+The entry point exposes three primary endpoints:
 
-**Cultural Voice Index** (`app/services/cultural_voice_index.py`)
-- 13+ pre-loaded CVI anchors covering Yoruba, Igbo, Hausa, and Pan-Nigerian registers
-- Anchor scoring: tribe matching (0.3), pidgin intensity delta (0.3), product context (0.2), frequency × confidence (0.2)
-- Returns top-5 anchors injected into the LLM system prompt as voice constraints
+- `POST /api/v1/simulate-review` — generate a culturally-grounded review
+- `GET /api/v1/personas` — list all personas for a user
+- `GET /api/v1/personas/{id}` — retrieve a single persona with full voice fingerprint
 
-**Groq Client** (`app/services/groq_client.py`)
-- LLM: `llama-3.1-70b-versatile`
-- System prompt encodes: persona city, LGA, language, pidgin intensity, review style, avg rating, and CVI anchors
-- Fidelity rubric computed locally via `_fidelity_rubric()` — no additional API calls
+When Supabase credentials are absent the service runs entirely on the embedded `DEMO_PERSONAS` list, so the API is always responsive.
+
+#### Persona Simulator — `app/services/persona_simulator.py`
+
+The core Task A agent. For each request it:
+
+1. Fetches the target persona from Supabase or falls back to `DEMO_PERSONAS`
+2. Retrieves up to 5 matching CVI anchors for the persona's city, language, and pidgin intensity
+3. Calls Groq LLaMA-3.1-70B with a culturally-constrained system prompt
+4. Computes predicted rating, confidence interval, CVI anchor hit rate, and behavioural fidelity score
+5. Returns a `ReviewResponse` with full generation metadata and the human evaluation rubric
+
+#### Cultural Voice Index — `app/services/cultural_voice_index.py`
+
+The CVI is the linguistic backbone of the system. It holds 13+ pre-loaded anchors spanning Yoruba, Igbo, Hausa, and Pan-Nigerian registers. Each anchor is scored against the incoming persona on four dimensions:
+
+| Dimension | Weight |
+|-----------|--------|
+| Tribe/region match | 0.30 |
+| Pidgin intensity delta | 0.30 |
+| Product context match | 0.20 |
+| Frequency x confidence | 0.20 |
+
+The top-5 scoring anchors are injected directly into the LLM system prompt as voice constraints.
+
+#### Groq Client — `app/services/groq_client.py`
+
+Handles all communication with the Groq inference API:
+
+- Model: `llama-3.1-70b-versatile`
+- System prompt encodes persona city, LGA, language, pidgin intensity, review style, average rating, and CVI anchors
+- The fidelity rubric (`_fidelity_rubric()`) is computed locally — no extra API call needed
 
 ---
 
@@ -57,8 +74,8 @@ ReviewRequest --> PersonaSimulator --> [CVI Lookup] --> GroqLLM --> ReviewRespon
 
 Personas span all six geopolitical zones of Nigeria:
 
-| # | Name | City | Tribe | Review Style | Pidgin Intensity |
-|---|------|------|-------|-------------|-----------------|
+| # | Name | City | Tribe | Style | Pidgin |
+|---|------|------|-------|-------|--------|
 | 1 | Emeka O. | Lagos | Igbo | Expressive | 0.82 |
 | 2 | Aisha H. | Kano | Hausa | Analytical | 0.55 |
 | 3 | Tunde B. | Lagos | Yoruba | Casual | 0.75 |
@@ -75,44 +92,44 @@ Personas span all six geopolitical zones of Nigeria:
 | 14 | Hassan U. | Kano | Hausa | Casual | 0.42 |
 | 15 | Sola B. | Ibadan | Yoruba | Street Honest | 0.76 |
 
-Each persona carries: age range, LGA, categories reviewed, sample reviews, cultural markers, voice radar (5-axis), cultural density score, and status.
+Each persona carries: age range, LGA, categories reviewed, sample reviews, cultural markers, a 5-axis voice radar, cultural density score, and status.
 
 ---
 
 ## 4. Cultural Voice Index (CVI)
 
-The CVI is the core differentiator. It is a curated database of Nigerian Pidgin phrases with:
+The CVI is a curated database of Nigerian Pidgin phrases. Each anchor stores:
 
-- **Tribe/region tag** (Yoruba, Igbo, Hausa, Pan-Nigerian, Edo, Urhobo)
-- **Pidgin intensity** (0–1 continuous)
-- **Formality register** (casual, expressive, formal, semi-formal)
-- **Sentiment category** (strong positive --> strong negative, 7 levels)
-- **Product context** (food, service, price, ambience, tech, fashion, general)
-- **Avg rating association** (the star rating this phrase typically accompanies)
+- **Tribe/region tag** — Yoruba, Igbo, Hausa, Pan-Nigerian, Edo, or Urhobo
+- **Pidgin intensity** — continuous 0-1 scale
+- **Formality register** — casual, expressive, formal, or semi-formal
+- **Sentiment category** — 7 levels from strong positive to strong negative
+- **Product context** — food, service, price, ambience, tech, fashion, or general
+- **Avg rating association** — the star rating this phrase typically accompanies
 - **Frequency and confidence scores**
 
-Example anchors: *"E sweet me die"* (Yoruba, food, strong positive, 5.0*), *"Slow like NEPA"* (Pan-Nigerian, service, negative, 2.0*), *"Gbam!"* (Pan-Nigerian, general, strong positive, 4.5*).
+Example anchors: *"E sweet me die"* (Yoruba, food, strong positive, 5.0), *"Slow like NEPA"* (Pan-Nigerian, service, negative, 2.0), *"Gbam!"* (Pan-Nigerian, general, strong positive, 4.5).
 
-The simulator injects the top-5 matched anchors into the LLM system prompt, constraining the model to produce culturally-grounded text rather than generic English.
+The simulator injects the top-5 matched anchors into the LLM system prompt, constraining the model to produce culturally-grounded text rather than sanitised English.
 
 ---
 
-## 5. Evaluation Metrics — Task A
+## 5. Evaluation Metrics
 
 ### 5.1 Automated Metrics
 
 | Metric | Score | Target | Method |
 |--------|-------|--------|--------|
-| BERTScore F1 | **0.87** | > 0.80 | Against 30-item Yelp held-out set |
-| ROUGE-L | **0.41** | > 0.35 | Against same held-out set |
+| BERTScore F1 | **0.87** | > 0.80 | 30-item Yelp held-out set |
+| ROUGE-L | **0.41** | > 0.35 | Same held-out set |
 | Behavioural Fidelity | **0.82** | > 0.70 | CVI anchor hit rate + pidgin intensity match |
-| CVI Hit Rate | **0.74** | — | Fraction of injected anchors appearing in output |
+| CVI Hit Rate | **0.74** | -- | Fraction of injected anchors present in output |
 
-BERTScore and ROUGE-L are computed against a 30-item English-language Yelp review held-out set (the closest publicly available proxy for restaurant review language). We acknowledge that no publicly available Nigerian-language review benchmark exists; the Yelp set measures linguistic coherence, not cultural specificity.
+BERTScore and ROUGE-L are measured against a 30-item Yelp review held-out set — the closest publicly available proxy. No Nigerian-language review benchmark exists; the Yelp set measures linguistic coherence, not cultural specificity.
 
 ### 5.2 Human Evaluation
 
-Five Nigerian judges (Lagos, Abuja, Kano, Enugu, Port Harcourt — one per zone) rated 20 generated reviews across 5 rubric dimensions (1–5 scale each):
+Five Nigerian judges (one per zone: Lagos, Abuja, Kano, Enugu, Port Harcourt) rated 20 generated reviews on a 1-5 rubric:
 
 | Dimension | Mean Score |
 |-----------|-----------|
@@ -120,41 +137,40 @@ Five Nigerian judges (Lagos, Abuja, Kano, Enugu, Port Harcourt — one per zone)
 | Pidgin Authenticity | **4.1** |
 | Cultural Relevance | **4.4** |
 | Behavioural Fidelity | **4.2** |
-| Overall | **4.25 / 5.0** |
+| **Overall** | **4.25 / 5.0** |
 
-Inter-rater agreement: k = 0.74 (substantial agreement). The human evaluation score is the primary ground truth for cultural authenticity — automated metrics measure linguistic form, not cultural soul.
+Inter-rater agreement: k = 0.74 (substantial). Human evaluation is the primary ground truth — automated metrics measure linguistic form, not cultural soul.
 
-### 5.3 Voice Synthesis (Differentiator)
+### 5.3 Voice Synthesis — Unique Differentiator
 
-Each generated review can be played back via Web Speech API (`SpeechSynthesisUtterance`). Rate and pitch are tuned to the persona's pidgin intensity:
-- `rate = 0.9 + intensity × 0.4` (range: 0.9–1.3)
-- `pitch = 1.0 + intensity × 0.25` (range: 1.0–1.25)
+Generated reviews play back aloud via browser-native `SpeechSynthesisUtterance`. Rate and pitch are tuned to each persona's pidgin intensity:
+
+- `rate = 0.9 + intensity x 0.4` (range: 0.9-1.3)
+- `pitch = 1.0 + intensity x 0.25` (range: 1.0-1.25)
 - `lang = "en-NG"`
 
-This makes cultural voice literally audible — a capability no other submission in the challenge has demonstrated.
+Cultural voice becomes literally audible — a capability not demonstrated by any other submission in the challenge.
 
 ---
 
 ## 6. Ablation Study
 
-Three ablation variants were run to prove each component earns its place:
-
 | Variant | BERTScore | ROUGE-L | Human Score |
 |---------|-----------|---------|-------------|
 | Full system | 0.87 | 0.41 | 4.25 |
-| No CVI anchors | 0.83 | 0.36 | 3.1 |
-| No persona context | 0.79 | 0.31 | 2.8 |
-| No rating head | 0.87 | 0.41 | — (N/A) |
+| No CVI anchors | 0.83 | 0.36 | 3.10 |
+| No persona context | 0.79 | 0.31 | 2.80 |
+| No rating head | 0.87 | 0.41 | N/A |
 
-Removing CVI anchors drops human authenticity score by 1.15 points — the single largest contributor to cultural fidelity.
+Removing CVI anchors drops the human authenticity score by 1.15 points — the single largest contributing factor to cultural fidelity.
 
 ---
 
-## 7. Limitations and Honest Caveats
+## 7. Limitations
 
-1. **No Nigerian review benchmark**: BERTScore and ROUGE-L are measured against Yelp English reviews, not Nigerian ones. This measures linguistic coherence, not cultural authenticity. Human eval is the true signal.
-2. **Pidgin as a spectrum**: Nigerian Pidgin varies enormously by region and generation. The CVI covers the major patterns but cannot capture every sub-regional variant.
-3. **15 personas**: The submission covers 15 synthetic personas. The system is designed to support arbitrarily many — persona creation is parameterised — but only 15 are shipped.
+1. **No Nigerian review benchmark.** BERTScore and ROUGE-L are measured against Yelp English reviews. The Yelp set captures linguistic form; human eval captures cultural authenticity.
+2. **Pidgin as a spectrum.** Nigerian Pidgin varies enormously by region and generation. The CVI covers major patterns but cannot capture every sub-regional variant.
+3. **15 personas.** The system is designed to support arbitrarily many — persona creation is fully parameterised — but only 15 are shipped with this submission.
 
 ---
 
@@ -164,8 +180,8 @@ Removing CVI anchors drops human authenticity score by 1.15 points — the singl
 # Install
 pip install -r requirements.txt
 
-# Environment
-cp .env.example .env  # add GROQ_API_KEY
+# Configure
+cp .env.example .env   # set GROQ_API_KEY
 
 # Run
 uvicorn app.main:app --host 0.0.0.0 --port 8000
@@ -173,10 +189,25 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 # Test
 curl -X POST http://localhost:8000/api/v1/simulate-review \
   -H "Content-Type: application/json" \
-  -d '{"user_id":"demo","persona_id":"1","product":{"name":"Zobo Premium","category":"beverage","location":"Lagos","price_tier":"mid"},"context":{"time_of_day":"evening","occasion":"casual","recency_of_visit":"first_time"}}'
+  -d '{
+    "user_id": "demo",
+    "persona_id": "1",
+    "product": {
+      "name": "Zobo Premium",
+      "category": "beverage",
+      "location": "Lagos",
+      "price_tier": "mid"
+    },
+    "context": {
+      "time_of_day": "evening",
+      "occasion": "casual",
+      "recency_of_visit": "first_time"
+    }
+  }'
 ```
 
 **Docker:**
+
 ```bash
 docker build -t naija-oracle-task-a .
 docker run -e GROQ_API_KEY=your_key -p 8000:8000 naija-oracle-task-a
@@ -186,8 +217,10 @@ docker run -e GROQ_API_KEY=your_key -p 8000:8000 naija-oracle-task-a
 
 ## 9. Live Deployment
 
-- **Frontend:** https://naija-oracle.netlify.app/simulate
-- **Backend (shared):** https://naija-oracle.onrender.com/api/v1/simulate-review
-- **Swagger UI:** https://naija-oracle.onrender.com/docs
-- **MLflow Experiments:** https://dagshub.com/austinLorenzMccoy/naija-oracle
-- **GitHub:** https://github.com/austinLorenzMccoy/naija_oracle
+| Resource | URL |
+|----------|-----|
+| Frontend | https://naija-oracle.netlify.app/simulate |
+| API endpoint | https://naija-oracle.onrender.com/api/v1/simulate-review |
+| Swagger UI | https://naija-oracle.onrender.com/docs |
+| MLflow runs | https://dagshub.com/austinLorenzMccoy/naija-oracle |
+| GitHub | https://github.com/austinLorenzMccoy/naija_oracle |
