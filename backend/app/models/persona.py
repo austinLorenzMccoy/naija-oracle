@@ -20,6 +20,9 @@ class ReviewStyle(str, Enum):
     CASUAL = "casual"
     TERSE = "terse"
     FORMAL = "formal"
+    STREET_HONEST = "street_honest"
+    HYPER_CRITICAL = "hyper_critical"
+    ASPIRATIONAL = "aspirational"
 
 class PersonaStatus(str, Enum):
     ACTIVE = "active"

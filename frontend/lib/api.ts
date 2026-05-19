@@ -1,8 +1,11 @@
 /**
  * Centralised API base URL.
- * - Production (Netlify): requests go to /api/v1 — Netlify proxies to Render
- *   via public/_redirects so CORS is never an issue
- * - Local dev: set NEXT_PUBLIC_API_BASE_URL=http://localhost:8003/api/v1 in .env.local
+ * - Production: always /api/v1 — Netlify proxies to Render via public/_redirects.
+ *   This is hardcoded so NEXT_PUBLIC_API_BASE_URL on Netlify cannot accidentally
+ *   bypass the proxy and trigger CORS errors.
+ * - Local dev: use NEXT_PUBLIC_API_BASE_URL if set, else http://localhost:8000/api/v1
  */
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE_URL || '/api/v1'
+  process.env.NODE_ENV === 'production'
+    ? '/api/v1'
+    : (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000/api/v1')
