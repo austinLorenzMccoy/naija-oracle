@@ -1,0 +1,376 @@
+"""
+Groq API client for LLM interactions
+"""
+
+import os
+import time
+from typing import Dict, List, Optional, Any, AsyncGenerator
+from groq import Groq
+from groq.types.chat import ChatCompletion
+import json
+
+from app.config import settings
+
+class GroqClient:
+    """Client for Groq API interactions"""
+    
+    def __init__(self):
+        if not settings.GROQ_API_KEY:
+            raise ValueError("GROQ_API_KEY environment variable is required")
+        
+        self.client = Groq(api_key=settings.GROQ_API_KEY)
+        self.model = settings.GROQ_MODEL
+    
+    async def chat_completion(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.7,
+        max_tokens: int = 1000,
+        stream: bool = False,
+        **kwargs
+    ) -> ChatCompletion:
+        """Create a chat completion"""
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=stream,
+                **kwargs
+            )
+            return response
+        except Exception as e:
+            raise Exception(f"Groq API error: {str(e)}")
+    
+    async def stream_completion(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float = 0.7,
+        max_tokens: int = 1000,
+        **kwargs
+    ) -> AsyncGenerator[str, None]:
+        """Stream chat completion tokens"""
+        try:
+            stream = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                stream=True,
+                **kwargs
+            )
+            
+            for chunk in stream:
+                if chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+                    
+        except Exception as e:
+            raise Exception(f"Groq streaming error: {str(e)}")
+    
+    def generate_review_prompt(
+        self,
+        persona: Dict[str, Any],
+        product: Dict[str, Any],
+        context: Dict[str, Any],
+        cvi_anchors: List[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
+        """Generate system prompt for review simulation"""
+        
+        cultural_anchors = "\n".join([
+            f'- "{anchor["phrase"]}" → {anchor["context"]}' 
+            for anchor in cvi_anchors
+        ])
+        
+        system_prompt = f"""
+You are Naija Oracle — a cultural intelligence system that generates authentic Nigerian consumer reviews.
+
+VOICE PROFILE:
+- City: {persona.get('city', 'Lagos')} | LGA: {persona.get('lga', 'Unknown')}
+- Language: {persona.get('primary_language', 'English')} | Pidgin intensity: {format(persona.get('pidgin_intensity', 0.5), '.1f')}/1.0
+- Style: {persona.get('review_style', 'casual')} | Avg rating: {persona.get('avg_rating', 3.5)}
+- Sentiment volatility: {persona.get('sentiment_volatility', 'medium')}
+
+CULTURAL ANCHORS (use similar voice and patterns):
+{cultural_anchors}
+
+REVIEW GENERATION RULES:
+1. Sound EXACTLY like this specific Nigerian user persona
+2. Use appropriate Pidgin intensity and cultural markers
+3. Include at least 2-3 phrases from the cultural anchors above
+4. Reflect the persona's typical rating range and sentiment patterns
+5. Consider the context (time, occasion, location)
+6. DO NOT write generic English reviews
+7. Include specific Nigerian cultural references where appropriate
+
+PRODUCT TO REVIEW:
+- Name: {product.get('name', 'Unknown')}
+- Category: {product.get('category', 'general')}
+- Location: {product.get('location', 'Unknown')}
+- Price tier: {product.get('price_tier', 'mid')}
+
+CONTEXT:
+- Time: {context.get('time_of_day', 'unknown')}
+- Occasion: {context.get('occasion', 'casual')}
+- Visit type: {context.get('recency_of_visit', 'first_time')}
+
+Generate a review that captures the authentic voice of this Nigerian consumer persona.
+"""
+        
+        user_prompt = f"""
+Review this {product.get('name', 'product')} at {product.get('location', 'location')}.
+
+Context: It's {context.get('time_of_day', 'time')} for a {context.get('occasion', 'casual')} visit.
+
+Generate a review that sounds exactly like this persona would write it.
+"""
+        
+        return [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt}
+        ]
+    
+    def generate_recommendation_prompt(
+        self,
+        persona: Dict[str, Any],
+        context: Dict[str, Any],
+        query: str,
+        history: List[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
+        """Generate system prompt for recommendation engine"""
+        
+        history_context = ""
+        if history:
+            history_context = "\n".join([
+                f"User: {turn.get('user_query', '')}" + "\n" + f"Agent: {turn.get('agent_response', '')}"
+                for turn in history[-3:]  # Last 3 turns
+            ])
+        
+        # Build history section outside f-string to avoid backslash issues
+        history_section = ""
+        if history_context:
+            history_section = f"CONVERSATION HISTORY:\n{history_context}\n"
+        
+        system_prompt = f"""
+You are Naija Oracle — a recommendation engine tuned to Nigerian consumer preferences and cultural context.
+
+USER PROFILE:
+- Location: {persona.get('city', 'Lagos')} | LGA: {persona.get('lga', 'Unknown')}
+- Primary language: {persona.get('primary_language', 'English')}
+- Avg rating tendency: {persona.get('avg_rating', 3.5)}
+- Cultural markers: {', '.join(persona.get('cultural_markers', []))}
+- Pidgin intensity: {format(persona.get('pidgin_intensity', 0.5), '.1f')}/1.0
+
+CURRENT CONTEXT:
+- Location: {context.get('location', 'Unknown')}
+- Time: {context.get('current_time', 'Unknown')}
+- Mood: {context.get('mood_signal', 'neutral')}
+- Budget: ₦{context.get('budget_naira', 'unspecified')}
+
+RECOMMENDATION RULES:
+1. Consider Nigerian cultural preferences and local context
+2. Factor in location proximity and accessibility
+3. Match the user's mood and occasion
+4. Respect budget constraints with realistic pricing
+5. Provide clear reasoning for each recommendation
+6. Use natural, culturally appropriate language
+7. Consider transportation and logistics in Nigerian context
+
+{history_section}
+Generate personalized recommendations with clear reasoning.
+"""
+        
+        return [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": query}
+        ]
+    
+    def _fidelity_rubric(self, review: str, persona: dict) -> dict:
+        """
+        Calculate human evaluation rubric scores for generated review.
+        
+        Args:
+            review: Generated review text
+            persona: Persona dictionary with cultural and demographic info
+            
+        Returns:
+            Dictionary with rubric scores (1-5 scale)
+        """
+        import re
+        from typing import Dict, Any
+        
+        # Nigerian Pidgin indicators
+        pidgin_indicators = [
+            'weti', 'wetin', 'abi', 'abeg', 'na', 'wey', 'dey', 'go', 'come',
+            'omo', 'alaye', 'ogbeni', 'iya', 'padi', 'guy', 'bros', 'sisi',
+            'japa', 'sapa', 'gbege', 'vawulence', 'gbeborun', 'shey',
+            'kpa', 'kini', 'wahala', 'how far', 'how you dey', 'no wahala'
+        ]
+        
+        # Cultural markers
+        cultural_markers = [
+            'naija', 'nigeria', 'lagos', 'abuja', 'port harcourt', 'kano',
+            'naira', '₦', 'ghana must go', 'danfo', 'keke', 'okada',
+            'boli', 'suya', 'jollof', 'egusi', 'akara', 'moi moi',
+            'afrobeats', 'nollywood', 'amvca', 'bbnaija', 'supa eagles'
+        ]
+        
+        # Voice consistency check
+        def calculate_voice_consistency(review: str, persona: dict) -> float:
+            """Check how consistently the review matches the persona's voice profile"""
+            
+            # Extract persona characteristics
+            pidgin_intensity = persona.get('pidgin_intensity', 0.5)
+            review_style = persona.get('review_style', 'casual')
+            avg_rating = persona.get('avg_rating', 3.5)
+            
+            # Count Pidgin usage
+            pidgin_count = sum(1 for word in pidgin_indicators if word.lower() in review.lower())
+            expected_pidgin = int(pidgin_intensity * 10)  # Expected Pidgin words
+            
+            # Check formality level
+            formal_words = ['excellent', 'outstanding', 'superb', 'magnificent']
+            informal_words = ['nice', 'good', 'bad', 'okay', 'fine']
+            
+            formal_count = sum(1 for word in formal_words if word.lower() in review.lower())
+            informal_count = sum(1 for word in informal_words if word.lower() in review.lower())
+            
+            # Calculate consistency score
+            pidgin_score = 1.0 - abs(pidgin_count - expected_pidgin) / max(expected_pidgin, 1)
+            
+            if review_style == 'formal':
+                formality_score = min(formal_count / 3, 1.0)
+            else:
+                formality_score = min(informal_count / 3, 1.0)
+            
+            return min((pidgin_score + formality_score) / 2 * 5 + 2.5, 5.0)
+        
+        # Pidgin authenticity check
+        def calculate_pidgin_authenticity(review: str) -> float:
+            """Check authenticity of Pidgin usage"""
+            
+            # Find Pidgin phrases
+            pidgin_phrases = []
+            for indicator in pidgin_indicators:
+                if indicator.lower() in review.lower():
+                    pidgin_phrases.append(indicator)
+            
+            # Check for natural Pidgin patterns
+            natural_patterns = [
+                r'\b(weti|wetin)\b.*\b(dey|happen)\b',
+                r'\b(abi|abeg)\b.*\b(no)\b',
+                r'\b(na)\b.*\b(im|him|her)\b',
+                r'\b(go|come)\b.*\b(there|here)\b'
+            ]
+            
+            pattern_matches = sum(1 for pattern in natural_patterns if re.search(pattern, review.lower(), re.IGNORECASE))
+            
+            # Calculate authenticity based on variety and natural usage
+            variety_score = min(len(pidgin_phrases) / 5, 1.0)
+            pattern_score = min(pattern_matches / 2, 1.0)
+            
+            return min((variety_score + pattern_score) / 2 * 5 + 2.0, 5.0)
+        
+        # Cultural relevance check
+        def calculate_cultural_relevance(review: str, persona: dict) -> float:
+            """Check cultural relevance and context"""
+            
+            # Count cultural markers
+            cultural_count = sum(1 for marker in cultural_markers if marker.lower() in review.lower())
+            
+            # Check persona's city/region
+            persona_city = persona.get('city', '').lower()
+            city_mentioned = persona_city and persona_city in review.lower()
+            
+            # Check for Nigerian context
+            nigerian_context = [
+                'market', 'shop', 'buy', 'price', 'cost', 'expensive', 'cheap',
+                'traffic', 'road', 'transport', 'location', 'area', 'street'
+            ]
+            
+            context_count = sum(1 for word in nigerian_context if word in review.lower())
+            
+            # Calculate cultural relevance
+            marker_score = min(cultural_count / 3, 1.0)
+            city_score = 1.0 if city_mentioned else 0.5
+            context_score = min(context_count / 4, 1.0)
+            
+            return min((marker_score + city_score + context_score) / 3 * 5 + 2.0, 5.0)
+        
+        # Behavioral fidelity check
+        def calculate_behavioral_fidelity(review: str, persona: dict) -> float:
+            """Check if behavior matches persona profile"""
+            
+            # Extract behavioral cues from persona
+            age = persona.get('age', 30)
+            occupation = persona.get('occupation', '').lower()
+            income_level = persona.get('income_level', 'middle').lower()
+            
+            # Age-appropriate language
+            if age < 25:
+                youth_slang = ['vawulence', 'gbege', 'sapa', 'japa']
+                youth_score = sum(1 for slang in youth_slang if slang in review.lower())
+            elif age > 45:
+                formal_indicators = ['indeed', 'certainly', 'excellent', 'outstanding']
+                formal_score = sum(1 for indicator in formal_indicators if indicator in review.lower())
+            else:
+                youth_score = formal_score = 0
+            
+            # Occupation-specific language
+            occupation_keywords = {
+                'tech': ['app', 'software', 'digital', 'online', 'tech'],
+                'business': ['customer', 'service', 'quality', 'value', 'professional'],
+                'student': ['school', 'study', 'exam', 'class', 'campus'],
+                'trader': ['market', 'sell', 'buy', 'customer', 'shop', 'price']
+            }
+            
+            occupation_score = 0
+            for occ_type, keywords in occupation_keywords.items():
+                if occ_type in occupation:
+                    occupation_score = sum(1 for keyword in keywords if keyword in review.lower())
+                    break
+            
+            # Income level considerations
+            if 'low' in income_level:
+                budget_words = ['expensive', 'costly', 'pricey', 'unaffordable']
+                budget_score = sum(1 for word in budget_words if word in review.lower())
+            elif 'high' in income_level:
+                premium_words = ['quality', 'premium', 'luxury', 'excellent', 'professional']
+                premium_score = sum(1 for word in premium_words if word in review.lower())
+            else:
+                budget_score = premium_score = 0
+            
+            # Calculate behavioral fidelity
+            age_score = min(max(youth_score, formal_score) / 2, 1.0)
+            occ_score = min(occupation_score / 2, 1.0)
+            inc_score = min(max(budget_score, premium_score) / 2, 1.0)
+            
+            return min((age_score + occ_score + inc_score) / 3 * 5 + 2.0, 5.0)
+        
+        # Calculate all scores
+        voice_consistency = calculate_voice_consistency(review, persona)
+        pidgin_authenticity = calculate_pidgin_authenticity(review)
+        cultural_relevance = calculate_cultural_relevance(review, persona)
+        behavioral_fidelity = calculate_behavioral_fidelity(review, persona)
+        
+        # Calculate overall fidelity
+        overall_fidelity = (voice_consistency + pidgin_authenticity + 
+                          cultural_relevance + behavioral_fidelity) / 4
+        
+        return {
+            "voice_consistency": round(voice_consistency, 1),
+            "pidgin_authenticity": round(pidgin_authenticity, 1),
+            "cultural_relevance": round(cultural_relevance, 1),
+            "behavioral_fidelity": round(behavioral_fidelity, 1),
+            "overall_fidelity": round(overall_fidelity, 1)
+        }
+    
+    async def test_connection(self) -> bool:
+        """Test Groq API connection"""
+        try:
+            response = await self.chat_completion([
+                {"role": "user", "content": "Say 'Hello from Naija Oracle'"}
+            ], max_tokens=10)
+            return True
+        except Exception:
+            return False
