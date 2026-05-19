@@ -18,7 +18,7 @@ Task A requires building an LLM-based agent capable of simulating authentic Nige
 ### 2.1 Overview
 
 ```
-ReviewRequest → PersonaSimulator → [CVI Lookup] → GroqLLM → ReviewResponse
+ReviewRequest --> PersonaSimulator --> [CVI Lookup] --> GroqLLM --> ReviewResponse
                       ↓                                          ↓
                 SupabaseClient                         BehaviouralFidelityScore
                       ↓                                          ↓
@@ -86,12 +86,12 @@ The CVI is the core differentiator. It is a curated database of Nigerian Pidgin 
 - **Tribe/region tag** (Yoruba, Igbo, Hausa, Pan-Nigerian, Edo, Urhobo)
 - **Pidgin intensity** (0–1 continuous)
 - **Formality register** (casual, expressive, formal, semi-formal)
-- **Sentiment category** (strong positive → strong negative, 7 levels)
+- **Sentiment category** (strong positive --> strong negative, 7 levels)
 - **Product context** (food, service, price, ambience, tech, fashion, general)
 - **Avg rating association** (the star rating this phrase typically accompanies)
 - **Frequency and confidence scores**
 
-Example anchors: *"E sweet me die"* (Yoruba, food, strong positive, 5.0★), *"Slow like NEPA"* (Pan-Nigerian, service, negative, 2.0★), *"Gbam!"* (Pan-Nigerian, general, strong positive, 4.5★).
+Example anchors: *"E sweet me die"* (Yoruba, food, strong positive, 5.0*), *"Slow like NEPA"* (Pan-Nigerian, service, negative, 2.0*), *"Gbam!"* (Pan-Nigerian, general, strong positive, 4.5*).
 
 The simulator injects the top-5 matched anchors into the LLM system prompt, constraining the model to produce culturally-grounded text rather than generic English.
 
@@ -122,7 +122,7 @@ Five Nigerian judges (Lagos, Abuja, Kano, Enugu, Port Harcourt — one per zone)
 | Behavioural Fidelity | **4.2** |
 | Overall | **4.25 / 5.0** |
 
-Inter-rater agreement: κ = 0.74 (substantial agreement). The human evaluation score is the primary ground truth for cultural authenticity — automated metrics measure linguistic form, not cultural soul.
+Inter-rater agreement: k = 0.74 (substantial agreement). The human evaluation score is the primary ground truth for cultural authenticity — automated metrics measure linguistic form, not cultural soul.
 
 ### 5.3 Voice Synthesis (Differentiator)
 

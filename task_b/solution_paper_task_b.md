@@ -18,7 +18,7 @@ Task B requires building an LLM-based recommendation agent that delivers hyper-p
 The core of Task B is the **R4 Pipeline** — a four-stage reasoning architecture:
 
 ```
-Query + Persona → REASON → RETRIEVE → RANK → REFINE → Recommendations
+Query + Persona --> REASON --> RETRIEVE --> RANK --> REFINE --> Recommendations
                     ↓          ↓         ↓        ↓
                  Intent    Candidates Context  Multi-turn
                  parsing   filtering  boosting  adjustment
@@ -39,14 +39,14 @@ Query + Persona → REASON → RETRIEVE → RANK → REFINE → Recommendations
 
 **Stage 2 — Retrieve** (`_retrieve_candidates`)
 - Filters product catalog by domain (food/fashion/fintech/entertainment/tech)
-- Applies hard budget constraint (`price_range[1] ≤ budget_naira`)
+- Applies hard budget constraint (`price_range[1] <= budget_naira`)
 - Applies location filter (Lagos/non-Lagos routing)
 - Adds collaborative filtering boost: personas with similar `avg_rating` tendency get higher-rated items boosted
 
 **Stage 3 — Rank** (`_rank_recommendations`)
 - Contextual scoring: base score + collab boost + mood boost + time boost + location proximity boost
-- Mood mappings: celebratory → premium boost, casual → mid/budget boost, romantic → premium boost
-- Time: "night" → boost items with "late night" feature flag
+- Mood mappings: celebratory --> premium boost, casual --> mid/budget boost, romantic --> premium boost
+- Time: "night" --> boost items with "late night" feature flag
 - All boost factors logged in response for inspector transparency
 
 **Stage 4 — Refine** (`_refine_with_context`)
@@ -70,13 +70,13 @@ The embedded catalog covers 7 real Lagos venues and services across 4 domains:
 
 | Item | Category | Location | Price Tier | Avg Rating |
 |------|----------|----------|-----------|-----------|
-| Yellow Chilli Restaurant | Nigerian fine dining | Victoria Island | Premium | 4.4⭐ |
-| Bucket Restaurant | Casual dining | Lekki Phase 1 | Mid | 4.1⭐ |
-| Mama T's Suya Spot | Street food | Surulere | Budget | 4.6⭐ |
-| New Afrika Shrine | Music venue | Ikeja | Mid | 4.7⭐ |
-| Filmhouse Cinemas | Movie theater | Ikeja City Mall | Mid | 4.2⭐ |
-| Lagos Fashion Hub | Boutique | Victoria Island | Premium | 4.3⭐ |
-| Kuda Bank | Digital banking | Online | Free | 4.0⭐ |
+| Yellow Chilli Restaurant | Nigerian fine dining | Victoria Island | Premium | 4.4 |
+| Bucket Restaurant | Casual dining | Lekki Phase 1 | Mid | 4.1 |
+| Mama T's Suya Spot | Street food | Surulere | Budget | 4.6 |
+| New Afrika Shrine | Music venue | Ikeja | Mid | 4.7 |
+| Filmhouse Cinemas | Movie theater | Ikeja City Mall | Mid | 4.2 |
+| Lagos Fashion Hub | Boutique | Victoria Island | Premium | 4.3 |
+| Kuda Bank | Digital banking | Online | Free | 4.0 |
 
 ---
 
@@ -107,7 +107,7 @@ Five Nigerian judges rated 20 recommendation sessions across 4 rubric dimensions
 | Reasoning Transparency | **4.2 / 5** |
 | **Overall** | **4.25 / 5** |
 
-Inter-rater agreement: κ = 0.76 (substantial). The reasoning chain (`"Why this?"` explainability feature) was rated by judges as the single most useful feature — it lets them verify cultural fit without relying on any numerical metric.
+Inter-rater agreement: k = 0.76 (substantial). The reasoning chain (`"Why this?"` explainability feature) was rated by judges as the single most useful feature — it lets them verify cultural fit without relying on any numerical metric.
 
 ### 4.3 Multi-Turn Accuracy
 
