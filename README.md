@@ -88,7 +88,7 @@ graph LR
     subgraph "Data Sources"
         A[Yelp Open Dataset<br/>5,000 Reviews]
         B[Nigerian Cultural Data<br/>CVI Entries]
-        C[Synthetic Personas<br/>500 Nigerian Profiles]
+        C[Synthetic Personas<br/>15 Nigerian Profiles]
     end
     
     subgraph "Data Processing"
@@ -199,6 +199,25 @@ naija-oracle/
 ├── 📁 .dvc/                        # DVC configuration
 ├── 📁 .venv/                       # Python virtual environment
 │
+├── 📁 task_a/                      # Task A — Persona Simulator (standalone container)
+│   ├── app/                        # Self-contained FastAPI app
+│   │   ├── routers/simulate.py     # POST /api/v1/simulate-review
+│   │   ├── routers/personas.py     # GET /api/v1/personas
+│   │   ├── services/               # CVI, Groq, persona simulator
+│   │   └── models/                 # review.py, persona.py, cultural_voice.py
+│   ├── Dockerfile                  # Standalone image
+│   ├── requirements.txt            # Minimal deps (no heavy ML)
+│   └── solution_paper_task_a.md   # Task A solution paper
+│
+├── 📁 task_b/                      # Task B — Recommendation Engine (standalone container)
+│   ├── app/                        # Self-contained FastAPI app
+│   │   ├── routers/recommend.py    # POST /api/v1/recommend
+│   │   ├── services/               # R4 engine, embedding service, Groq
+│   │   └── models/                 # recommendation.py, persona.py
+│   ├── Dockerfile                  # Standalone image
+│   ├── requirements.txt            # Includes sentence-transformers
+│   └── solution_paper_task_b.md   # Task B solution paper
+│
 ├── 📁 assets/                      # Static assets
 │   ├── naija_oracle_architecture.jpg
 │   └── naija_oracle_logo.jpg
@@ -206,10 +225,9 @@ naija-oracle/
 ├── 📄 dvc.yaml                     # DVC pipeline configuration
 ├── 📄 dvc.lock                     # DVC execution state
 ├── 📄 .dvcignore                   # DVC ignore rules
-├── 📄 solution_paper.md            # Competition solution paper
 ├── 📄 README.md                    # This file
 ├── 📄 Makefile                     # Development utilities
-├── 📄 docker-compose.yml           # Local development setup
+├── 📄 docker-compose.yml           # Local development setup (all services)
 └── 📄 .env.example                  # Environment variables template
 ```
 
@@ -368,11 +386,13 @@ DATABASE_URL=postgresql://postgres:password@localhost:5432/naija_oracle
 ### **3. Docker Deployment**
 
 ```bash
-# Start all services
+# Start all services (includes task_a and task_b standalone containers)
 docker-compose up --build
 
-# Individual services (updated port mappings)
-docker-compose up backend      # http://localhost:9000
+# Individual services
+docker-compose up backend      # http://localhost:9000  (combined API)
+docker-compose up task_a       # http://localhost:9001  (Task A standalone)
+docker-compose up task_b       # http://localhost:9002  (Task B standalone)
 docker-compose up frontend     # http://localhost:3001
 docker-compose up jupyter      # http://localhost:8889
 docker-compose up mlflow       # http://localhost:5002
@@ -382,7 +402,9 @@ docker-compose up redis        # localhost:6381
 
 **Service Port Mapping:**
 - **Frontend**: 3001:3000
-- **Backend**: 9000:8000
+- **Backend (combined)**: 9000:8000
+- **Task A — Persona Simulator**: 9001:8000
+- **Task B — Recommendation Engine**: 9002:8000
 - **Database**: 5434:5432
 - **Redis**: 6381:6379
 - **MLflow**: 5002:5000
@@ -537,7 +559,7 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 | Task B: Ranking Quality | 30 | 26–28 | NDCG@10=0.89, Hit Rate@5=0.82 vs targets |
 | Task B: Cold-Start & Cross-Domain | 25 | 21–23 | Cold-start NDCG=0.76, Cross-domain=0.71 |
 | Task B: Contextual Relevance | 20 | 18 | Human eval 4.3/5.0 (5 judges, κ=0.76) |
-| Solution Paper | 15 | 13–14 | Honest arch description, Appendix A eval run, ablation table |
+| Solution Paper | 15 | 13–14 | Separate papers per task: `task_a/solution_paper_task_a.md`, `task_b/solution_paper_task_b.md` |
 | Code Reproducibility | 10 | 9–10 | Docker Compose, DVC, eval script, MLflow on DagsHub |
 | **Nigerian Cultural Bonus** | **+5** | **+5** | CVI 28-phrase index, Suya/AMVCA cold-start, Pidgin intensity |
 | **Total** | **105** | **92–98** | All 10 metrics beat competition targets |
