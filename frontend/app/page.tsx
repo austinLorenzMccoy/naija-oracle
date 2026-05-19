@@ -129,7 +129,7 @@ export default function Home() {
             {[
               { value: '2', label: 'Agents Built' },
               { value: '3', label: 'Datasets' },
-              { value: '500+', label: 'Personas' },
+              { value: '15', label: 'Personas' },
               { value: '<200ms', label: 'Latency' },
             ].map(({ value, label }) => (
               <div key={label} className="text-center">

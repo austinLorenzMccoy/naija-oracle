@@ -126,8 +126,8 @@ async def get_persona_stats(
             return {"user_id": user_id, "analytics": analytics}
         # Global demo stats — always available
         return {
-            "total_personas": 156,
-            "active_personas": 89,
+            "total_personas": 15,
+            "active_personas": 15,
             "cities_covered": 12,
             "languages_supported": 5,
             "avg_cultural_density": 0.87,
@@ -135,8 +135,8 @@ async def get_persona_stats(
     except Exception as e:
         # Return demo stats rather than 500 so the dashboard never breaks
         return {
-            "total_personas": 156,
-            "active_personas": 89,
+            "total_personas": 15,
+            "active_personas": 15,
             "cities_covered": 12,
             "languages_supported": 5,
             "avg_cultural_density": 0.87,

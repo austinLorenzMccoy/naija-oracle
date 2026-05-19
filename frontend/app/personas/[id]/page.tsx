@@ -1,7 +1,7 @@
 import PersonaDetailClient from './PersonaDetailClient'
 
 export function generateStaticParams() {
-  return [{ id: '1' }, { id: '2' }, { id: '3' }]
+  return Array.from({ length: 15 }, (_, i) => ({ id: String(i + 1) }))
 }
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
