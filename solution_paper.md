@@ -205,8 +205,9 @@ All changes statistically significant (p < 0.05). The CVI contributes most to re
 - Browser-native voice synthesis (`SpeechSynthesis`) lets judges *hear* the cultural voice — a high-pidgin persona sounds noticeably faster and more energetic than a formal one, making the fidelity difference tangible without additional infrastructure.
 
 **Limitations:**  
-- The CVI currently covers only 13 phrases; scaling to 100+ would improve authenticity further.  
-- Our synthetic personas, while diverse, may leak simple biases from the generating LLM.  
+- **Task B metrics are proxy estimates.** No publicly available Nigerian restaurant click log exists, so NDCG@10 and Hit Rate@5 are computed via persona-consistency simulation: the same LLM that generates personas scores recommendation fit. This is an upper-bound proxy; real A/B testing on live traffic would produce lower and more honest figures. We chose to report it transparently rather than omit it, and we treat the human evaluation rubric (4.3/5.0, κ=0.76) as the authoritative Task B score.  
+- The CVI currently covers 28 phrases; scaling to 100+ with crowd-sourced contributions would improve authenticity further.  
+- Our synthetic personas, while diverse across 6 cities and 4 tribes, may carry biases from the generating LLM.  
 - Cross‑domain transfer remains weak for distant categories (e.g., food → fintech). A knowledge graph with explicit cultural rules could help.  
 - We only evaluated on food & restaurant domains; generalisation to fashion, electronics, or services requires more data.
 
