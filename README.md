@@ -53,7 +53,7 @@ The name is deliberate: an *oracle* knows what you'll say before you say it. "Na
 
 ## 🎬 Demo Video
 
-**[▶ Watch the 3-minute demo](#)** — live walkthrough of Task A (review simulation with Nigerian Pidgin output), Task B (contextual recommendations), cold-start onboarding, and the persona voice fingerprint system.
+**[▶ Watch the 3-minute demo](#)** — live walkthrough of Task A (review simulation with Nigerian Pidgin output and voice playback), Task B (contextual recommendations), cold-start onboarding, and the persona voice fingerprint system.
 
 ## 🎯 Problem Solved
 
@@ -437,9 +437,9 @@ uv run python train_persona_simulator.py
 ### **Frontend**
 - **React 19** - Modern UI framework
 - **TypeScript** - Type safety
-- **Vite** - Fast build tool
+- **Next.js 16** - App router, static export
 - **TailwindCSS** - Utility-first styling
-- **Motion** - Smooth animations
+- **Web Speech API** - Browser-native voice synthesis for review playback
 - **Lucide** - Beautiful icons
 
 ### **ML/AI**
@@ -550,6 +550,7 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 3. **Mock-first UI** — dashboard never shows a blank screen even when Render cold-starts
 4. **Tracked experiments** — 4 MLflow runs live on DagsHub: full eval + 3 ablations matching paper Section 4.3
 5. **Honest solution paper** — circular eval acknowledged, real architecture described, qualitative example included
+6. **Persona voice playback** — generated reviews play back aloud via browser-native `SpeechSynthesis`, with pitch and rate tuned to each persona's pidgin intensity; no extra dependencies
 
 ## 🔄 Current State (May 2026)
 
@@ -559,6 +560,7 @@ docker-compose -f docker-compose.test.yml up --abort-on-container-exit
 - **✅ Solution paper** — honest architecture description (Groq prompting + CVI injection, no fine-tuning), Appendix A with sample eval terminal output, qualitative Nkoyo Restaurant example, circular eval caveat stated
 - **✅ Evaluation pipeline** — `backend/scripts/run_evaluation.py` calls live `/simulate-review`, computes ROUGE-L + BERTScore against 30-item Yelp held-out set, logs to MLflow
 - **✅ Mock-first UI** — all dashboard pages show real data instantly; silently upgrade to live API data when Render is available
+- **✅ Voice playback** — "Play" button on `/simulate` output and `/personas` sample reviews speaks generated text aloud; pitch/rate tuned to persona's pidgin intensity via `SpeechSynthesis`
 - **✅ CORS fixed** — `allow_origins=["*"]` on backend; Netlify `_redirects` proxy as secondary path
 - **✅ Static export** — `generateStaticParams` on dynamic persona routes; Netlify builds pass
 - **✅ `/personas/stats` hardened** — returns demo stats (never 500) when Supabase is unavailable

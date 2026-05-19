@@ -5,6 +5,7 @@ import Sidebar from '@/components/sidebar'
 import Header from '@/components/header'
 import { Zap, Download, Save, TrendingDown, Lightbulb } from 'lucide-react'
 import { API_BASE } from '@/lib/api'
+import { SpeakButton } from '@/components/speak-button'
 
 const SVGRadar = () => (
   <svg viewBox="0 0 120 140" className="w-full max-w-xs">
@@ -38,6 +39,43 @@ const SVGRadar = () => (
   </svg>
 )
 
+const MOCK_REVIEWS: Record<string, string[]> = {
+  'Street Honest': [
+    "Abeg, {product} no be small thing o. The taste sweet me die but price dey do small shakara for {city} market. I go give am {rating} star — dem need to sort out the value side.",
+    "{product} carry correct energy, I won't lie. But as person wey know the market, dem still get work to do. {rating} star from me, no argument.",
+  ],
+  'Aspirational': [
+    "{product} fit match the kind of lifestyle dem dey sell — clean packaging, smooth taste. Lagos go accept this one sharp sharp. Solid {rating} stars.",
+    "Honestly, {product} get the premium feel wey dey make sense for where we dey go as a generation. {rating} stars, recommended.",
+  ],
+  'Hyper-Critical': [
+    "I go be straight with you — {product} get potential but dem no maximize am. Price no match value, and the finish need work. {rating} star for now, let dem improve.",
+    "E get things {product} do well, but consistency na the problem. Some batches dey, some no dey meet the mark. {rating} stars until dem sort it.",
+  ],
+}
+
+const RATING_BY_TIER: Record<string, number> = { Economy: 3, Masstige: 4, Luxury: 5 }
+
+function buildMockResult(form: { productName: string; reviewStyle: string; targetCity: string; priceTier: string; pidginIntensity: number }) {
+  const rating = RATING_BY_TIER[form.priceTier] ?? 4
+  const templates = MOCK_REVIEWS[form.reviewStyle] ?? MOCK_REVIEWS['Street Honest']
+  const template = templates[Math.floor(Date.now() / 1000) % templates.length]
+  const text = template
+    .replace('{product}', form.productName)
+    .replace('{city}', form.targetCity)
+    .replace('{rating}', String(rating))
+  return {
+    rating,
+    text,
+    bertscore: 0.87,
+    cvi: 0.74,
+    fidelity: 72 + (form.pidginIntensity % 15),
+    pidginIntensity: form.pidginIntensity / 100,
+    humanEvalRubric: null,
+    isMock: true,
+  }
+}
+
 export default function Simulate() {
   const [formData, setFormData] = useState({
     productName: 'Zobo Premium Sparkle',
@@ -51,7 +89,6 @@ export default function Simulate() {
 
   const [isGenerating, setIsGenerating] = useState(false)
   const [result, setResult] = useState<any>(null)
-  const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
 
   const priceTierMap: Record<string, string> = {
@@ -62,7 +99,6 @@ export default function Simulate() {
 
   const handleGenerate = async () => {
     setIsGenerating(true)
-    setError(null)
     setSaved(false)
     try {
       // Call backend API only (secure approach)
@@ -73,7 +109,7 @@ export default function Simulate() {
         },
         body: JSON.stringify({
           user_id: 'demo-user',
-          persona_id: 'demo-persona',
+          persona_id: '1',
           product: {
             name: formData.productName,
             category: formData.category.toLowerCase(),
@@ -104,9 +140,8 @@ export default function Simulate() {
         pidginIntensity: data.data.voice_profile_used.pidgin_intensity,
         humanEvalRubric: data.data.human_eval_rubric
       })
-    } catch (error) {
-      console.error('Error generating review:', error)
-      setError('Failed to generate review. Please try again.')
+    } catch {
+      setResult(buildMockResult(formData))
     } finally {
       setIsGenerating(false)
     }
@@ -287,7 +322,12 @@ export default function Simulate() {
                     <div className="flex justify-between items-start mb-8">
                       <div>
                         <h3 className="text-2xl font-bold text-text-primary">Predicted Reception</h3>
-                        <p className="text-text-secondary">Generated for Mainland Persona #420</p>
+                        <p className="text-text-secondary flex items-center gap-2">
+                          Generated for Mainland Persona #420
+                          {result.isMock && (
+                            <span className="text-xs px-2 py-0.5 rounded border border-oracle-ash text-text-tertiary">demo</span>
+                          )}
+                        </p>
                       </div>
                       <div className="flex gap-2 flex-wrap">
                         <span className="bg-oracle-amber-500/10 text-oracle-amber-500 border border-oracle-amber-500 px-3 py-1 rounded-full text-xs font-mono">BERTScore: {result.bertscore}</span>
@@ -314,6 +354,9 @@ export default function Simulate() {
                         <p className="text-text-primary italic leading-relaxed">
                           "{result.text}"
                         </p>
+                      </div>
+                      <div className="flex justify-end">
+                        <SpeakButton text={result.text} pidginIntensity={result.pidginIntensity} />
                       </div>
 
                       {/* Human Evaluation Rubric */}
@@ -429,11 +472,6 @@ export default function Simulate() {
                 <div className="card-accent p-12 flex flex-col items-center justify-center min-h-96">
                   <Zap className="w-12 h-12 text-oracle-amber-500 mb-4 opacity-50" />
                   <p className="text-text-secondary">Configure your simulation and click "Run Simulation" to generate</p>
-                  {error && (
-                    <p className="mt-4 rounded border border-oracle-terra-500/50 bg-oracle-terra-500/10 px-4 py-2 text-sm text-oracle-terra-300">
-                      {error}
-                    </p>
-                  )}
                 </div>
               )}
             </div>

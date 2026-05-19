@@ -35,7 +35,7 @@ All code, models, and experiments are open‑source and reproducible via Docker 
 
 The system comprises three layers:
 
-- **Frontend** – Next.js dashboard (Netlify) with pages: `/simulate` (Task A), `/recommend` (Task B), `/cold-start`, and `/metrics`.
+- **Frontend** – Next.js dashboard (Netlify) with pages: `/simulate` (Task A), `/recommend` (Task B), `/cold-start`, `/personas` (voice fingerprint radar charts, cultural markers, review history), and `/metrics`. Generated reviews include a **voice playback** button — browser-native `SpeechSynthesis` reads the review aloud with pitch and rate tuned to each persona's pidgin intensity, making the cultural voice audible during live demos.
 - **Backend** – FastAPI (Render) that orchestrates Groq API calls, retrieves CVI anchors, computes evaluation metrics, and manages Supabase.
 - **Data Layer** – Supabase with `pgvector`, RLS, real‑time subscriptions; stores personas, review generations, conversation history, and experiment logs.
 
@@ -201,7 +201,8 @@ All changes statistically significant (p < 0.05). The CVI contributes most to re
 **What worked well:**  
 - The Cultural Voice Index is a lightweight but powerful way to anchor LLM outputs in local speech patterns.  
 - Groq’s sub‑200ms latency enabled real‑time streaming, which impressed judges during live demo.  
-- Docker + `uv` made full‑stack reproducibility straightforward; judges could run `make setup && make run` without cloud accounts.
+- Docker + `uv` made full‑stack reproducibility straightforward; judges could run `make setup && make run` without cloud accounts.  
+- Browser-native voice synthesis (`SpeechSynthesis`) lets judges *hear* the cultural voice — a high-pidgin persona sounds noticeably faster and more energetic than a formal one, making the fidelity difference tangible without additional infrastructure.
 
 **Limitations:**  
 - The CVI currently covers only 13 phrases; scaling to 100+ would improve authenticity further.  

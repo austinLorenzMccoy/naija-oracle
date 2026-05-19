@@ -1,6 +1,4 @@
-from fastapi import APIRouter
-from bert_score import BERTScorer
-from rouge_score import rouge_scorer
+from fastapi import APIRouter, HTTPException
 import numpy as np
 import json
 import os
@@ -27,19 +25,26 @@ class RougeResponse(BaseModel):
 class RMSEResponse(BaseModel):
     rmse: float
 
-# Lazy initialization
 _bertscorer = None
 _rouge = None
 
 def get_bert_scorer():
     global _bertscorer
     if _bertscorer is None:
+        try:
+            from bert_score import BERTScorer
+        except ImportError:
+            raise HTTPException(status_code=503, detail="bert-score not installed")
         _bertscorer = BERTScorer(lang="en")
     return _bertscorer
 
 def get_rouge_scorer():
     global _rouge
     if _rouge is None:
+        try:
+            from rouge_score import rouge_scorer
+        except ImportError:
+            raise HTTPException(status_code=503, detail="rouge-score not installed")
         _rouge = rouge_scorer.RougeScorer(["rougeL"], use_stemmer=True)
     return _rouge
 

@@ -7,6 +7,7 @@ import Header from '@/components/header'
 import { ArrowLeft, FileText, Lightbulb, Loader2, RefreshCw } from 'lucide-react'
 import { API_BASE } from '@/lib/api'
 import { MOCK_PERSONA_BY_ID } from '@/lib/mock-data'
+import { SpeakButton } from '@/components/speak-button'
 
 interface VoiceRadar {
   skepticism: number
@@ -281,9 +282,12 @@ export default function PersonaDetailClient({ personaId }: { personaId: string }
                     </div>
                     <div className="space-y-3">
                       {persona.sample_reviews.map((r, i) => (
-                        <p key={i} className="text-text-secondary text-sm italic border-l-2 border-oracle-amber-500/30 pl-3">
-                          "{r}"
-                        </p>
+                        <div key={i} className="flex items-start justify-between gap-3">
+                          <p className="text-text-secondary text-sm italic border-l-2 border-oracle-amber-500/30 pl-3">
+                            "{r}"
+                          </p>
+                          <SpeakButton text={r} pidginIntensity={persona.pidgin_intensity} />
+                        </div>
                       ))}
                     </div>
                   </div>
