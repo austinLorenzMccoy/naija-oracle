@@ -77,8 +77,15 @@ export default function Recommend() {
           temperature: 0.7
         })
       })
+      if (!response.ok) {
+        throw new Error(
+          response.status === 502 || response.status === 503 || response.status === 504
+            ? `Backend is restarting on Render free tier (${response.status}) — wait ~30s and retry`
+            : `Request failed (${response.status})`
+        )
+      }
       const data = await response.json()
-      if (!response.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.error || 'Recommendation request failed')
       }
       setExplanation(data.data.explanation)

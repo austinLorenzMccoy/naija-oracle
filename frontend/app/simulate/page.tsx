@@ -127,7 +127,11 @@ export default function Simulate() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to generate review')
+        throw new Error(
+          response.status === 502 || response.status === 503 || response.status === 504
+            ? `Backend is restarting on Render free tier (${response.status}) — wait ~30s and retry`
+            : `Request failed (${response.status})`
+        )
       }
 
       const data = await response.json()
