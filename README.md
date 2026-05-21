@@ -263,6 +263,9 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api/v1
 ```
 
 ### **Backend Deployment (Render)**
+
+> **⚠️ Free-tier memory note:** The backend runs on Render's 512 MB free plan. `torch`, `sentence-transformers`, and `transformers` load into RAM on first use and together consume ~300–400 MB. On a cold start this can cause slow responses or a temporary OOM restart. The frontend shows an inline notice when this happens and falls back to demo data automatically. If a live request fails, wait ~30 seconds and retry — the service recovers on its own. Upgrading to a paid Render instance (1 GB+) eliminates this entirely.
+
 ```bash
 # 1. Create Render account
 # 2. Connect GitHub repository
