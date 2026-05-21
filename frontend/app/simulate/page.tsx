@@ -313,7 +313,10 @@ export default function Simulate() {
               {isGenerating ? (
                 <div className="card-accent p-12 flex flex-col items-center justify-center min-h-96">
                   <div className="w-3 h-3 bg-oracle-amber-500 rounded-full animate-pulse mb-4"></div>
-                  <p className="text-text-secondary">Oracle is thinking...</p>
+                  <p className="text-text-secondary mb-3">Oracle is thinking...</p>
+                  <p className="text-xs text-text-tertiary text-center max-w-sm border border-oracle-ash rounded px-4 py-2 bg-oracle-void">
+                    <span className="text-oracle-amber-500 font-medium">Render free-tier note:</span> torch + sentence-transformers load into 512 MB RAM on first use. If this takes &gt;30s the service may be cold-starting — it will complete or fall back to demo data automatically.
+                  </p>
                 </div>
               ) : result ? (
                 <>

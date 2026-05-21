@@ -11,9 +11,14 @@ class EmbeddingService:
     """Service for generating and managing embeddings"""
     
     def __init__(self):
-        self._model_name = settings.EMBEDDING_MODEL
-        self._model: Optional[object] = None
-        self.available = False  # never imported at startup; only via _get_model()
+        try:
+            from sentence_transformers import SentenceTransformer  # noqa: F401
+            self._model_name = settings.EMBEDDING_MODEL
+            self._model: Optional[object] = None  # loaded on first use
+            self.available = True
+        except ImportError:
+            self.available = False
+            self._model = None
 
     def _get_model(self):
         """Lazily load the SentenceTransformer model on first use."""
