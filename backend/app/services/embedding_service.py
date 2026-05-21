@@ -11,15 +11,9 @@ class EmbeddingService:
     """Service for generating and managing embeddings"""
     
     def __init__(self):
-        # Lazy-load heavy ML dependencies so the server starts without them
-        try:
-            from sentence_transformers import SentenceTransformer  # noqa: F401
-            self._model_name = settings.EMBEDDING_MODEL
-            self._model: Optional[object] = None  # loaded on first use
-            self.available = True
-        except ImportError:
-            self.available = False
-            self._model = None
+        self._model_name = settings.EMBEDDING_MODEL
+        self._model: Optional[object] = None
+        self.available = False  # never imported at startup; only via _get_model()
 
     def _get_model(self):
         """Lazily load the SentenceTransformer model on first use."""
