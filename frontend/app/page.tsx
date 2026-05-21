@@ -56,9 +56,11 @@ export default function Home() {
 
       if (!res.ok) throw new Error('API error')
       const data = await res.json()
-      const text: string = data?.data?.review_text ?? ''
+      const text: string = (data?.success && data?.data?.review_text) ? data.data.review_text : ''
       const rating: number = data?.data?.predicted_rating ?? 4
       const fidelity: number = Math.round((data?.data?.behavioural_fidelity_score ?? 0.82) * 100)
+
+      if (!text) throw new Error('empty')
 
       setDemoRating(rating)
       setDemoFidelity(fidelity)
@@ -72,7 +74,7 @@ export default function Home() {
         if (i >= text.length) clearInterval(interval)
       }, 30)
     } catch {
-      // Fallback demo text if backend not running
+      // Fallback: backend not running, OOM restart, or empty response
       const fallback = 'E be like say this Zobo fine die o — the colour deep like Lagos twilight and the taste sharp sharp. But abeg, the price too high for ordinary market woman. I go manage sha, taste dey there.'
       setDemoRating(4)
       setDemoFidelity(84)
