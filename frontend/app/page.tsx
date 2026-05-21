@@ -7,6 +7,13 @@ import { API_BASE } from '@/lib/api'
 
 const DEMO_PERSONA = { city: 'Lagos', language: 'Pidgin', product: 'Zobo Premium Sparkle', category: 'beverage' }
 
+const MOCK_DEMO_OUTPUTS = [
+  { rating: 4, fidelity: 84, text: 'E be like say this Zobo fine die o — the colour deep like Lagos twilight and the taste sharp sharp. But abeg, the price too high for ordinary market woman. I go manage sha, taste dey there.' },
+  { rating: 5, fidelity: 88, text: 'Omo, Zobo Premium Sparkle na different thing entirely! From the first sip e don catch me. The hibiscus dey balance well well — no too sweet, no too sour. Gbam! This one fit sit for any owambe table without shame.' },
+  { rating: 3, fidelity: 79, text: 'The packaging fine no doubt, but make dem no let the shakara overshadow the substance. Taste dey — e dey manage — but for that price tier, I expect more. Abeg, sort the sweetness, then we go talk.' },
+  { rating: 4, fidelity: 82, text: 'Sharp sharp, the vibe of this Zobo catch me from the bottle alone. Lagos people go chop this brand well well if dem push am right. Na the aftertaste still dey do small wahala, otherwise solid 4 stars from me.' },
+]
+
 // Pidgin phrase highlighting
 function highlightPidgin(text: string) {
   const phrases = ['sharp sharp', 'NEPA', 'abeg', 'omo', 'sha', 'die o', 'no be', 'wahala', 'na', 'e don', 'chop', 'fall hand', 'sabi', 'yawa', 'shakara']
@@ -75,9 +82,10 @@ export default function Home() {
       }, 30)
     } catch {
       // Fallback: backend not running, OOM restart, or empty response
-      const fallback = 'E be like say this Zobo fine die o — the colour deep like Lagos twilight and the taste sharp sharp. But abeg, the price too high for ordinary market woman. I go manage sha, taste dey there.'
-      setDemoRating(4)
-      setDemoFidelity(84)
+      const mock = MOCK_DEMO_OUTPUTS[Math.floor(Date.now() / 1000) % MOCK_DEMO_OUTPUTS.length]
+      setDemoRating(mock.rating)
+      setDemoFidelity(mock.fidelity)
+      const fallback = mock.text
       setDemoState('done')
       let i = 0
       const interval = setInterval(() => {
