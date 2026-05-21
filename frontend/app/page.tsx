@@ -41,7 +41,7 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: 'demo-user',
-          persona_id: 'demo-persona',
+          persona_id: '1',
           product: {
             name: DEMO_PERSONA.product,
             category: DEMO_PERSONA.category,

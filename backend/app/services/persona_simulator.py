@@ -52,7 +52,7 @@ class PersonaSimulator:
                 request.product.category
             )
             
-            review_text = await self._generate_local_review(persona, cvi_anchors, request)
+            review_text = await self._generate_groq_review(persona, cvi_anchors, request)
             
             # Predict rating based on sentiment and persona patterns
             predicted_rating = await self._predict_rating(
@@ -108,6 +108,29 @@ class PersonaSimulator:
                 error=str(e),
                 request_id=str(uuid.uuid4())
             )
+
+    async def _generate_groq_review(
+        self,
+        persona: Persona,
+        cvi_anchors: List,
+        request: ReviewRequest
+    ) -> str:
+        """Call Groq LLM with CVI-injected prompt; fall back to local template on error."""
+        try:
+            messages = self.groq.generate_review_prompt(
+                persona.dict(),
+                request.product.dict(),
+                request.context.dict(),
+                [anchor.dict() for anchor in cvi_anchors]
+            )
+            response = await self.groq.chat_completion(
+                messages,
+                temperature=request.temperature,
+                max_tokens=request.max_tokens
+            )
+            return response.choices[0].message.content.strip()
+        except Exception:
+            return await self._generate_local_review(persona, cvi_anchors, request)
 
     async def _generate_local_review(
         self,
