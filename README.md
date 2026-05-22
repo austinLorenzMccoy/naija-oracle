@@ -53,7 +53,9 @@ The name is deliberate: an *oracle* knows what you'll say before you say it. "Na
 
 ## 🎬 Demo Video
 
-**[▶ Watch the 3-minute demo](#)** — live walkthrough of Task A (review simulation with Nigerian Pidgin output and voice playback), Task B (contextual recommendations), cold-start onboarding, and the persona voice fingerprint system.
+[![Watch the Naija Oracle demo on YouTube](https://img.youtube.com/vi/wHPXTy9AcUY/maxresdefault.jpg)](https://youtu.be/wHPXTy9AcUY)
+
+**[▶ Watch the full demo on YouTube](https://youtu.be/wHPXTy9AcUY)** — live walkthrough of Task A (review simulation with Nigerian Pidgin output and voice playback), Task B (contextual recommendations), cold-start onboarding, and the persona voice fingerprint system.
 
 ## 🎯 Problem Solved
 
