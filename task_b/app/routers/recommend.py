@@ -19,9 +19,11 @@ router = APIRouter()
 
 # Dependency injection
 def get_recommendation_engine() -> RecommendationEngine:
-    # These would be injected from the main app in a real implementation
     groq_client = GroqClient()
-    supabase = SupabaseClient()
+    try:
+        supabase = SupabaseClient()
+    except ValueError:
+        supabase = None  # demo mode
     embeddings = EmbeddingService()
     return RecommendationEngine(groq_client, supabase, embeddings)
 

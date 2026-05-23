@@ -17,10 +17,12 @@ router = APIRouter()
 
 # Dependency injection
 def get_persona_simulator() -> PersonaSimulator:
-    # These would be injected from the main app in a real implementation
     groq_client = GroqClient()
     cvi = CulturalVoiceIndex()
-    supabase = SupabaseClient()
+    try:
+        supabase = SupabaseClient()
+    except ValueError:
+        supabase = None  # demo mode — DEMO_PERSONAS used as fallback
     return PersonaSimulator(groq_client, cvi, supabase)
 
 @router.post("/simulate-review", response_model=ReviewResponse)

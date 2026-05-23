@@ -118,8 +118,12 @@ class RecommendationEngine:
         start_time = time.time()
         
         try:
-            # Get persona data
-            persona = await self.supabase.get_persona(request.persona_id)
+            # Get persona data — fall back to demo personas when Supabase is unavailable
+            if self.supabase is not None:
+                persona = await self.supabase.get_persona(request.persona_id)
+            else:
+                from app.services.supabase_client import DEMO_PERSONA_BY_ID
+                persona = DEMO_PERSONA_BY_ID.get(request.persona_id)
             if not persona:
                 return RecommendationResponse(
                     success=False,
@@ -552,6 +556,8 @@ class RecommendationEngine:
     async def _store_interaction(self, request: RecommendationRequest, generation: RecommendationGeneration):
         """Store recommendation interaction for analytics"""
         try:
+            if self.supabase is None:
+                return
             await self.supabase.store_recommendation_interaction(
                 user_id=request.user_id,
                 persona_id=request.persona_id,

@@ -35,8 +35,12 @@ class PersonaSimulator:
         start_time = time.time()
         
         try:
-            # Get persona data
-            persona = await self.supabase.get_persona(request.persona_id)
+            # Get persona data — fall back to demo personas when Supabase is unavailable
+            if self.supabase is not None:
+                persona = await self.supabase.get_persona(request.persona_id)
+            else:
+                from app.services.supabase_client import DEMO_PERSONA_BY_ID
+                persona = DEMO_PERSONA_BY_ID.get(request.persona_id)
             if not persona:
                 return ReviewResponse(
                     success=False,
