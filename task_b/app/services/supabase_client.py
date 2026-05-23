@@ -10,8 +10,6 @@ from postgrest import APIResponse
 
 from app.config import settings
 from app.models.persona import Persona, PersonaCreate, PersonaUpdate
-from app.models.review import ReviewGeneration
-from app.models.recommendation import RecommendationGeneration
 
 DEMO_PERSONAS = [
     Persona(
